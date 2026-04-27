@@ -72,6 +72,9 @@ def head(title: str, description: str, path: str, og_type: str = "website",
 
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
 
   {schema_blocks}<script type="application/ld+json">{json.dumps(org_schema(), separators=(",", ":"))}</script>
   <script type="application/ld+json">{json.dumps(website_schema(), separators=(",", ":"))}</script>
