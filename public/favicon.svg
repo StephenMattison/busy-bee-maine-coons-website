@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Busy Bee Maine Coons">
+  <circle cx="32" cy="32" r="30" fill="#1A3C34"/>
+  <circle cx="32" cy="32" r="22" fill="#D4A017"/>
+  <path d="M22 30 q10 -8 20 0" fill="none" stroke="#1A3C34" stroke-width="3" stroke-linecap="round"/>
+  <path d="M22 36 q10 8 20 0" fill="none" stroke="#1A3C34" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="26" cy="28" r="2" fill="#1A3C34"/>
+  <circle cx="38" cy="28" r="2" fill="#1A3C34"/>
+  <path d="M16 18 q4 -6 10 -4" fill="none" stroke="#1A3C34" stroke-width="3" stroke-linecap="round"/>
+  <path d="M48 18 q-4 -6 -10 -4" fill="none" stroke="#1A3C34" stroke-width="3" stroke-linecap="round"/>
+</svg>
