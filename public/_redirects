@@ -1,19 +1,4 @@
-# Pretty URLs → real .html files (so /kittens, /the-breed, etc. work cleanly)
-/kittens          /kittens.html        200
-/the-breed        /the-breed.html      200
-/care             /care.html           200
-/stories          /stories.html        200
-/community        /community.html      200
-/tools            /tools.html          200
-/shop             /shop.html           200
-/about            /about.html          200
-/contact          /contact.html        200
-/cart             /cart.html           200
-/account          /account.html        200
-/privacy          /privacy.html        200
-/terms            /terms.html          200
-/accessibility    /accessibility.html  200
-/ethics           /ethics.html         200
+
 
 # Force apex → www (or vice versa — flip if Cloudflare DNS is configured for apex)
 # https://www.busybeemainecoons.com/*  https://busybeemainecoons.com/:splat  301!
