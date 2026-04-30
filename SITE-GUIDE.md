@@ -1,5 +1,5 @@
 # Site Guide: Building Perfect, Ultra-Secure, WCAG-Compliant, SEO-Optimized Websites for #1 Google Ranking
-
+Updated 2026/04/28
 **Project Objective**: Create flawless, production-ready websites that achieve:
 - **WCAG 2.2 Level AA (and AAA where feasible)** compliance for universal accessibility.
 - **Ultra-high security** standards (beyond baseline, including proactive threat mitigation).
@@ -87,10 +87,20 @@ X-Frame-Options: DENY
 Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: geolocation=(), microphone=(), camera=()
 Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-site
 Cross-Origin-Embedder-Policy: require-corp (for isolation where needed)
+Access-Control-Allow-Origin: https://your-canonical-domain.com
+Vary: Origin
 ```
 - Use `nonce` or hashes for inline scripts/styles to avoid `'unsafe-inline'` where possible.
 - Regularly audit and tighten CSP.
+
+#### 2.2.1 CORS — Never ship `Access-Control-Allow-Origin: *`
+Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin: *` on static assets. This must be explicitly overridden on **every new site** from day one:
+- In `public/_headers`, under the global `/*` block, always set `Access-Control-Allow-Origin: https://<canonical-domain>` and `Vary: Origin`.
+- Also add `Cross-Origin-Resource-Policy: same-site` so assets cannot be embedded by arbitrary third parties.
+- Only widen ACAO (e.g. to `*`) for a specific path prefix that is genuinely a public API (e.g. `/api/public/*`) — never globally.
+- After deploy, verify with: `curl -sI https://<domain>/ | grep -i access-control` — it must echo your domain, not `*`.
 
 ### 2.3 Input Validation, Sanitization & Injection Prevention
 - **Server-side validation** for ALL inputs (never trust client).
@@ -217,6 +227,93 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - **Loading States**: Skeleton screens, optimistic UI, clear progress.
 - **Conversion Focus**: Clear value prop above fold, prominent CTAs, trust signals (testimonials, security badges, guarantees), minimal friction checkout/forms.
 - **A/B & Personalization**: Data-driven (but privacy-first).
+
+### 4.1 Asset Cache-Busting (Mandatory for ALL Static Sites)
+
+**Rule**: Every static asset reference (CSS, JS, images, fonts, icons, manifest) must include a content-hash query string (`?v=<hash>`) appended at build time. This is non-negotiable for every site we build.
+
+**Why it's mandatory**:
+- Allows aggressive 1-year `immutable` caching at the CDN and in browsers (huge perf win, near-zero repeat-visit latency).
+- Eliminates the need to ever manually purge the CDN cache when updating an image, stylesheet, or script — the new hash makes the URL a "new" resource browsers fetch automatically.
+- Prevents stale-asset bugs (mismatched CSS/JS, old logos lingering after a brand update).
+- This is the same pattern Webpack, Vite, Next.js, Astro, and every modern framework use. There is no scenario where omitting it is correct for a production static site.
+
+**Implementation pattern (Python static-site builder)**:
+
+```python
+import hashlib
+from pathlib import Path
+
+OUT = Path(__file__).parent / "public"
+
+def asset_v(rel_path: str) -> str:
+    """Return ?v=<md5[:10]> for cache-busting an asset under public/.
+    Returns empty string if the file doesn't exist (graceful fallback)."""
+    f = OUT / rel_path.lstrip("/")
+    if not f.exists():
+        return ""
+    h = hashlib.md5(f.read_bytes()).hexdigest()[:10]
+    return f"?v={h}"
+```
+
+Use it in every asset reference:
+
+```python
+# Inside f-strings (most templates):
+f'<link rel="stylesheet" href="/css/style.css{asset_v("/css/style.css")}">'
+f'<script src="/js/script.js{asset_v("/js/script.js")}" defer></script>'
+f'<img src="/images/logo.webp{asset_v("/images/logo.webp")}" alt="Logo">'
+
+# Inside non-f-string templates, use string concatenation:
+'<img src="/images/hero.webp' + asset_v("/images/hero.webp") + '" alt="Hero">'
+
+# For dynamic image fields (cards, listings):
+f'<img src="/images/kittens/{k["image"]}{asset_v("/images/kittens/" + k["image"])}" ...>'
+```
+
+**Pair with the matching CDN cache headers** (`public/_headers` for Cloudflare Pages):
+
+```
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+```
+
+HTML is never cached (so new asset hashes propagate instantly); hashed assets are cached for 1 year `immutable`.
+
+**Coverage checklist** — every one of these must use `asset_v()`:
+- [ ] All `<link rel="stylesheet">` tags
+- [ ] All `<script src=...>` tags
+- [ ] All `<img src=...>` tags (hero, logos, cards, content images, OG images)
+- [ ] `<link rel="icon">`, apple-touch-icon, manifest icons
+- [ ] `<link rel="manifest">` site.webmanifest
+- [ ] Preload tags (`<link rel="preload" href=...>`)
+- [ ] CSS `url(...)` references (handled separately — version the CSS file itself)
+- [ ] Open Graph / Twitter card image URLs (use absolute URL + hash)
+
+**Verification after build**:
+
+```bash
+# Confirm hashes appear in built HTML — should show ?v=<hash> on every asset:
+grep -oE 'src="[^"]*\?v=[^"]*"' public/index.html | head
+grep -oE 'href="[^"]*\.(css|webp|js)\?v=[^"]*"' public/index.html | head
+
+# Confirm no literal {asset_v(...)} leaked into HTML (common bug in non-f-string templates):
+! grep -r 'asset_v(' public/ && echo "Clean"
+```
+
+**Common pitfall**: When a template uses a plain triple-quoted string (not an f-string), `{asset_v(...)}` will be emitted as literal text and break the URL. Always either (a) make the template an f-string, or (b) use string concatenation as shown above. The verification grep above catches this.
 
 ---
 
