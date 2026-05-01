@@ -705,3 +705,36 @@ p  { margin-bottom: 1rem; }
   background: var(--bg-alt, #f9fafb); padding: .65rem .85rem; border-radius: var(--radius-md, .5rem);
   text-align: center; font-weight: 600; color: var(--primary-dark, var(--primary));
 }
+
+/* ============================================================
+   Story modal (used on /stories — opens articles in overlay)
+   ============================================================ */
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.story-modal[hidden] { display: none !important; }
+.story-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: clamp(.5rem, 3vw, 2rem); }
+.story-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, .72); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: storyFade .18s ease-out; }
+.story-modal-panel {
+  position: relative; z-index: 1; background: #fff; color: var(--text, #111);
+  width: min(880px, 100%); max-height: calc(100vh - 2rem);
+  overflow-y: auto; border-radius: var(--radius-lg, 1rem);
+  box-shadow: 0 25px 60px -12px rgba(0,0,0,.45), 0 8px 20px -6px rgba(0,0,0,.25);
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3rem);
+  animation: storyPop .22s cubic-bezier(.2,.8,.2,1);
+}
+.story-modal-close {
+  position: sticky; top: 0; float: right; margin: -.5rem -.5rem 0 1rem;
+  width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.96); color: var(--primary-dark, var(--primary, #1A3C34));
+  border: 1px solid rgba(0,0,0,.08); border-radius: 999px; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08); transition: background .15s, transform .15s;
+  z-index: 2;
+}
+.story-modal-close:hover { background: var(--primary, #1A3C34); color: #fff; transform: scale(1.05); }
+.story-modal-close:focus-visible { outline: 2px solid var(--accent, #F4B400); outline-offset: 2px; }
+.story-modal-content .article { margin: 0; }
+.story-modal-content figure img { max-height: 360px; object-fit: cover; }
+@keyframes storyFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes storyPop { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .story-modal-backdrop, .story-modal-panel { animation: none; }
+}
