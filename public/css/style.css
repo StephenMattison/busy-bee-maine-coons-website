@@ -137,22 +137,23 @@ p  { margin-bottom: 1rem; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 1.25rem; height: 68px; gap: 1rem;
 }
+/* Brand logo: transparent PNG, replaces inline bee + wordmark.
+   Inner spans are hidden visually but kept for the aria-label / SEO fallback. */
 .logo {
-  font-family: var(--font-head);
-  font-size: 1.375rem; font-weight: 800;
-  color: var(--primary); display: flex; align-items: center; gap: .55rem;
-  letter-spacing: -0.02em;
+  display: block;
+  background: url("/images/logo.png") left center / contain no-repeat;
+  width: 184px;          /* renders ~52px tall at the image's 1.78:1 aspect */
+  height: 52px;
+  flex-shrink: 0;
+  /* Hide the legacy text/bee children without breaking the accessible name */
+  font-size: 0; line-height: 0; color: transparent;
+  text-indent: -9999px; overflow: hidden;
+  gap: 0; letter-spacing: 0;
 }
-.logo-mark {
-  width: 38px; height: 38px; flex: 0 0 38px;
-  background: var(--secondary);
-  color: var(--primary);
-  display: grid; place-items: center;
-  border-radius: 50%;
-  font-weight: 900;
-  box-shadow: var(--shadow-sm);
+.logo > * { display: none; }
+@media (max-width: 520px) {
+  .logo { width: 156px; height: 44px; }
 }
-.logo span { color: var(--secondary-dark); }
 
 .nav-links { display: flex; gap: .15rem; align-items: center; }
 .nav-links a {
@@ -562,7 +563,12 @@ p  { margin-bottom: 1rem; }
 }
 @media (max-width: 880px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .footer-inner { grid-template-columns: 1fr; } }
-.footer .logo { color: #fff; margin-bottom: 1rem; }
+.footer .logo {
+  width: 240px; height: 78px;
+  margin-bottom: 1rem;
+  /* Lift the dark logo art off the dark footer with a soft cream halo */
+  filter: drop-shadow(0 0 8px rgba(255,247,224,.55)) drop-shadow(0 0 2px rgba(255,247,224,.9));
+}
 .footer .logo span { color: var(--secondary-light); }
 .footer-brand p { color: rgba(255,255,255,.75); font-size: .9375rem; }
 .footer h4 {
