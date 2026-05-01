@@ -235,7 +235,7 @@ p  { margin-bottom: 1rem; }
 }
 .hero-inner {
   max-width: var(--container); margin: 0 auto;
-  display: grid; grid-template-columns: 1.1fr .9fr; gap: 3rem; align-items: center;
+  display: grid; grid-template-columns: 1fr 1.05fr; gap: 3rem; align-items: center;
 }
 @media (max-width: 880px) { .hero-inner { grid-template-columns: 1fr; } .hero { padding: 3rem 1.25rem 4rem; } }
 .hero h1 { color: #fff; margin-bottom: 1rem; }
@@ -254,13 +254,14 @@ p  { margin-bottom: 1rem; }
 }
 .hero-badge svg { width: 14px; height: 14px; color: var(--secondary-light); }
 .hero-image {
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-  background: var(--bg-alt);
-  aspect-ratio: 4/3;
-  display: grid; place-items: center;
   position: relative;
+}
+.hero-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
 }
 .hero-image .placeholder-art {
   font-family: var(--font-head);
