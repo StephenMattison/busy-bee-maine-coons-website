@@ -1,5 +1,9 @@
 # Site Guide: Building Perfect, Ultra-Secure, WCAG-Compliant, SEO-Optimized Websites for #1 Google Ranking
-Updated 2026/04/28
+
+> **⚠️ Canonical source: [StephenMattison/site-guide](https://github.com/StephenMattison/site-guide)**
+> Do **not** edit this file directly in a website repo. All edits must go to the canonical repo above.
+> To pull the latest version into this repo, run: `./sync-guide.sh`
+
 **Project Objective**: Create flawless, production-ready websites that achieve:
 - **WCAG 2.2 Level AA (and AAA where feasible)** compliance for universal accessibility.
 - **Ultra-high security** standards (beyond baseline, including proactive threat mitigation).
@@ -81,7 +85,7 @@ Security is foundational. We build "secure by design" with defense-in-depth. No 
 ### 2.2 Headers & Browser Protections (CSP Required)
 Implement these response headers on **every** page/response:
 ```
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://trusted-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.example.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.example.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 Referrer-Policy: strict-origin-when-cross-origin
@@ -95,12 +99,93 @@ Vary: Origin
 - Use `nonce` or hashes for inline scripts/styles to avoid `'unsafe-inline'` where possible.
 - Regularly audit and tighten CSP.
 
-#### 2.2.1 CORS — Never ship `Access-Control-Allow-Origin: *`
-Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin: *` on static assets. This must be explicitly overridden on **every new site** from day one:
-- In `public/_headers`, under the global `/*` block, always set `Access-Control-Allow-Origin: https://<canonical-domain>` and `Vary: Origin`.
-- Also add `Cross-Origin-Resource-Policy: same-site` so assets cannot be embedded by arbitrary third parties.
-- Only widen ACAO (e.g. to `*`) for a specific path prefix that is genuinely a public API (e.g. `/api/public/*`) — never globally.
-- After deploy, verify with: `curl -sI https://<domain>/ | grep -i access-control` — it must echo your domain, not `*`.
+#### 2.2.1 CSP — `script-src 'self'` blocks ALL inline `<script>` (including event handlers)
+Our standard CSP omits `'unsafe-inline'` from `script-src`. This is correct and mandatory on this network. It also means any inline `<script>…</script>` block, any `onclick="…"`/`onsubmit="…"`/etc. attribute, and any `javascript:` URL is silently blocked by the browser in production. The page renders fine; the feature just does nothing. This is the #1 "works locally, dead in prod" gotcha.
+
+**Hard rule for every new site:**
+- `script-src` must **not** include `'unsafe-inline'`. If you see it in a draft `_headers` or CSP config, remove it before launch.
+- Put **all** JavaScript in external files under `/js/<feature>.js` and load with `<script src="/js/<feature>.js" defer></script>`.
+- Wire up events with `addEventListener` from inside that external file. Never use `onclick=`/`onsubmit=`/`onchange=`/any `on*=` HTML attribute.
+- Never use `javascript:` URLs in links or buttons.
+- The only inline `<script>` allowed in HTML is `<script type="application/ld+json">…</script>` for structured data.
+- If a third-party snippet truly requires inline JS, use a CSP hash or nonce for that exact snippet. Never weaken policy with `'unsafe-inline'`.
+
+**Standard implementation pattern:**
+
+```html
+<form id="size-form" class="tool-form">
+  <button type="submit" class="btn btn-primary">Estimate Adult Size</button>
+</form>
+<script src="/js/tools.js" defer></script>
+```
+
+```js
+document.getElementById('size-form')?.addEventListener('submit', function (event) {
+  event.preventDefault();
+  predictSize();
+});
+```
+
+**Mandatory preflight before every deploy / PR approval:**
+
+```bash
+# 1) Fail if any inline event handlers exist in built HTML
+rg -n '\son[a-z]+\s*=' public/
+
+# 2) Fail if any inline executable <script> exists
+rg -nP '<script(?![^>]*(src=|type="application/ld\+json"))' public/
+
+# 3) Fail if any javascript: URL exists
+rg -n 'javascript:' public/
+```
+
+Expected result for all three commands: **no output**.
+
+**Verify after deploy:**
+- Open the deployed page in Chrome/Firefox DevTools → **Console** tab. CSP violations show as bright-red `Refused to execute inline script because it violates the following Content Security Policy directive…` errors. Zero CSP errors = pass.
+- Spot-check the affected interaction in production, not just locally. Static-file previews and local file opens can hide CSP failures that only show up behind the real headers.
+
+**Launch gate:** Any CSP console error or any match from the three `rg` commands above blocks launch until fixed.
+
+#### 2.2.2 CORS — Never ship `Access-Control-Allow-Origin: *`
+Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin: *` on static assets. This must be explicitly overridden on **every new site** from day one.
+
+**Mandatory `public/_headers` template — copy this verbatim and substitute `<canonical-domain>`:**
+
+```
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self), usb=(), interest-cohort=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), autoplay=(self), encrypted-media=(), fullscreen=(self)
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-site
+  Access-Control-Allow-Origin: https://<canonical-domain>
+  Vary: Origin
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+```
+
+**Rules:**
+- `Access-Control-Allow-Origin` must be your exact canonical domain — never `*`.
+- `Cross-Origin-Resource-Policy: same-site` prevents your assets being hotlinked or embedded by third-party pages.
+- `Vary: Origin` tells CDN/proxies to cache responses per origin, which is required alongside a non-wildcard ACAO.
+- Only widen ACAO to `*` for a specific path prefix that is genuinely a public API (e.g. `/api/public/*`) — never globally.
+- After deploy, verify: `curl -sI https://<canonical-domain>/ | grep -i access-control` — it must show your domain, not `*`.
+
+**Launch gate:** Missing or wildcard ACAO on the global `/*` block = block launch until fixed.
 
 ### 2.3 Input Validation, Sanitization & Injection Prevention
 - **Server-side validation** for ALL inputs (never trust client).
@@ -350,6 +435,6 @@ grep -oE 'href="[^"]*\.(css|webp|js)\?v=[^"]*"' public/index.html | head
 
 **Final Mandate**: Every line of code, every piece of content, every configuration must contribute to **WCAG perfection**, **military-grade security**, and **unbeatable SEO**. No compromises. Sites built to this standard will rank #1, convert at industry-leading rates, and serve every user equitably while withstanding sophisticated attacks.
 
-**Version**: 2026.04 | **Last Reviewed**: April 23, 2026 | **Next Review**: Quarterly or after major Google/Core updates.
+**Version**: 2026.04 | **Last Reviewed**: April 28, 2026 (test #5) | **Next Review**: Quarterly or after major Google/Core updates.
 
 *This guide is living — update immediately when Google, W3C, or security standards evolve.*
