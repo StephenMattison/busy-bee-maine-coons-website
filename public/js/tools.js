@@ -4,6 +4,15 @@
 (function () {
   'use strict';
 
+  function bindFormSubmit(formId, handler) {
+    var form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      handler();
+    });
+  }
+
   function show(id, html) {
     var el = document.getElementById(id);
     if (!el) return;
@@ -194,7 +203,7 @@
     show('name-result',
       '<h3>Your name ideas</h3>' +
       '<ul class="tool-list name-list">' + picks.map(function (n) { return '<li>' + n + '</li>'; }).join('') + '</ul>' +
-      '<p><button type="button" class="btn btn-outline" onclick="generateName()">Generate 5 more</button></p>'
+      '<p><button type="button" class="btn btn-outline" data-generate-more>Generate 5 more</button></p>'
     );
   };
 
@@ -235,4 +244,18 @@
       '<p class="muted">Always check the kcal/cup on your specific food bag — values vary widely. Adjust by ±10% based on monthly weight checks. Consult your vet for medical conditions.</p>'
     );
   };
+
+  bindFormSubmit('size-form', window.predictSize);
+  bindFormSubmit('cost-form', window.calcCost);
+  bindFormSubmit('groom-form', window.planGrooming);
+  bindFormSubmit('quiz-form', window.scoreQuiz);
+  bindFormSubmit('name-form', window.generateName);
+  bindFormSubmit('feed-form', window.calcFeeding);
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-generate-more]');
+    if (!button) return;
+    event.preventDefault();
+    window.generateName();
+  });
 })();

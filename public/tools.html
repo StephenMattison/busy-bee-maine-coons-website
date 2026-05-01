@@ -150,7 +150,7 @@
         <h2 class="section-title">📏 Adult Size Predictor</h2>
         <p class="section-subtitle">Maine Coons keep growing for 3–5 years. Enter your kitten's current weight and age
           to estimate their adult size.</p>
-        <form id="size-form" class="tool-form" onsubmit="return false;">
+        <form id="size-form" class="tool-form">
           <label>Current weight (lbs)
             <input type="number" id="size-weight" min="0.5" max="30" step="0.1" required placeholder="e.g. 6.5">
           </label>
@@ -163,7 +163,7 @@
               <option value="female">Female</option>
             </select>
           </label>
-          <button type="button" class="btn btn-primary" onclick="predictSize()">Estimate Adult Size</button>
+          <button type="submit" class="btn btn-primary">Estimate Adult Size</button>
         </form>
         <div id="size-result" class="tool-result" hidden></div>
       </div>
@@ -175,7 +175,7 @@
         <h2 class="section-title">💰 Lifetime Cost Calculator</h2>
         <p class="section-subtitle">Realistic year-one and 15-year ownership totals based on premium-care averages for
           large-breed cats.</p>
-        <form id="cost-form" class="tool-form" onsubmit="return false;">
+        <form id="cost-form" class="tool-form">
           <label>Food quality
             <select id="cost-food">
               <option value="60">Standard ($60/mo)</option>
@@ -207,7 +207,7 @@
           <label>Expected lifespan (years)
             <input type="number" id="cost-years" min="10" max="20" value="15" step="1">
           </label>
-          <button type="button" class="btn btn-primary" onclick="calcCost()">Calculate Total Cost</button>
+          <button type="submit" class="btn btn-primary">Calculate Total Cost</button>
         </form>
         <div id="cost-result" class="tool-result" hidden></div>
       </div>
@@ -219,7 +219,7 @@
         <h2 class="section-title">🪮 Grooming Planner</h2>
         <p class="section-subtitle">A personalized brushing &amp; bath schedule for your Maine Coon's coat type and
           lifestyle.</p>
-        <form id="groom-form" class="tool-form" onsubmit="return false;">
+        <form id="groom-form" class="tool-form">
           <label>Coat density
             <select id="groom-coat">
               <option value="light">Light / silky</option>
@@ -240,7 +240,7 @@
               <option value="yes">Yes (spring / fall blowout)</option>
             </select>
           </label>
-          <button type="button" class="btn btn-primary" onclick="planGrooming()">Build My Schedule</button>
+          <button type="submit" class="btn btn-primary">Build My Schedule</button>
         </form>
         <div id="groom-result" class="tool-result" hidden></div>
       </div>
@@ -251,7 +251,7 @@
       <div class="section-inner" style="max-width:780px;">
         <h2 class="section-title">🧩 Compatibility Quiz</h2>
         <p class="section-subtitle">Is a Maine Coon the right fit for your home? Answer 6 honest questions.</p>
-        <form id="quiz-form" class="tool-form" onsubmit="return false;">
+        <form id="quiz-form" class="tool-form">
           <label>How many hours/day will the cat be alone?
             <select id="q1">
               <option value="3">0–4 hours</option>
@@ -300,7 +300,7 @@
               <option value="0">Unsure</option>
             </select>
           </label>
-          <button type="button" class="btn btn-primary" onclick="scoreQuiz()">See My Result</button>
+          <button type="submit" class="btn btn-primary">See My Result</button>
         </form>
         <div id="quiz-result" class="tool-result" hidden></div>
       </div>
@@ -311,7 +311,7 @@
       <div class="section-inner" style="max-width:780px;">
         <h2 class="section-title">✨ Name Generator</h2>
         <p class="section-subtitle">200+ majestic, regal, playful, and nature-inspired names for your gentle giant.</p>
-        <form id="name-form" class="tool-form" onsubmit="return false;">
+        <form id="name-form" class="tool-form">
           <label>Style
             <select id="name-style">
               <option value="regal">Regal &amp; majestic</option>
@@ -328,7 +328,7 @@
               <option value="female">Female</option>
             </select>
           </label>
-          <button type="button" class="btn btn-primary" onclick="generateName()">Generate 5 Names</button>
+          <button type="submit" class="btn btn-primary">Generate 5 Names</button>
         </form>
         <div id="name-result" class="tool-result" hidden></div>
       </div>
@@ -340,7 +340,7 @@
         <h2 class="section-title">🥣 Daily Feeding Calculator</h2>
         <p class="section-subtitle">Calorie target tuned for Maine Coons by weight, life stage, and activity. Always
           confirm with your vet.</p>
-        <form id="feed-form" class="tool-form" onsubmit="return false;">
+        <form id="feed-form" class="tool-form">
           <label>Current weight (lbs)
             <input type="number" id="feed-weight" min="1" max="30" step="0.1" required placeholder="e.g. 14">
           </label>
@@ -366,7 +366,7 @@
               <option value="high">High (very playful)</option>
             </select>
           </label>
-          <button type="button" class="btn btn-primary" onclick="calcFeeding()">Calculate Daily Calories</button>
+          <button type="submit" class="btn btn-primary">Calculate Daily Calories</button>
         </form>
         <div id="feed-result" class="tool-result" hidden></div>
       </div>
