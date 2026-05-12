@@ -258,6 +258,26 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
   - Article, FAQPage, HowTo, BreadcrumbList, Organization, WebSite, Person (author), Review, AggregateRating.
   - Validate with Google Rich Results Test.
 - **Canonical Tags**: Self-referencing or correct target for duplicates.
+
+#### 3.2.1 Page Title and Meta Description Rules
+- Every indexable page must have a unique `<title>` and unique `<meta name="description">`.
+- Start the title with the most important keyword phrase for that page, then finish with the brand.
+- Keep titles readable and specific; do not stuff keywords or repeat the same phrase twice.
+- Write descriptions for users first: summarize the page, include the main keyword naturally, and make the benefit or action clear.
+- Keep descriptions unique across the site so search engines do not see near-duplicate snippets.
+- Match the visible page intent exactly. Product pages should describe the product, collection pages should describe the category, and support pages should describe the support topic.
+- Use the same core wording in `<title>`, Open Graph title, and Twitter title so shared links look consistent.
+- Keep Open Graph and Twitter descriptions aligned with the page description unless a shorter social version is needed.
+- Add a strong canonical URL for every indexable page and make sure the title/description describe that canonical version, not a duplicate.
+- For blog posts, lead with the topic or question being answered and end with the brand.
+- For product pages, lead with the product type or primary use case, then add the size, format, or benefit, then end with the brand.
+- For home pages and collection pages, lead with the main commercial keyword phrase, then describe the offering, then end with the brand.
+- Recommended pattern:
+  - Title: `Primary Keyword or Topic | Supporting Benefit or Modifier | Brand`
+  - Description: `Primary keyword + user benefit + differentiator + call to action`
+- Avoid vague titles such as `Home`, `Products`, or `Blog` unless they are supported by strong keyword context.
+- Avoid duplicate brand-first titles unless the brand itself is the primary search term for that page.
+- If a page targets social sharing, keep the Open Graph image current and use a concise, compelling title/description pair.
 - **Hreflang** (if multilingual): Proper implementation.
 
 ### 3.3 Technical SEO (Foundation for Crawlability & Rankings)
