@@ -39,8 +39,8 @@ NAV = [
 # ---- Shared chunks ---------------------------------------------------------
 def head(title: str, description: str, path: str, og_type: str = "website",
          schema: list | None = None) -> str:
-    canonical = SITE + "/" + (path if path != "index.html" else "")
-    canonical = canonical.rstrip("/") if path != "index.html" else SITE + "/"
+    canonical_path = "" if path == "index.html" else path.replace(".html", "")
+    canonical = SITE + ("/" + canonical_path if canonical_path else "/")
     schema_blocks = ""
     if schema:
         for s in schema:
