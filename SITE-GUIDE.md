@@ -315,6 +315,50 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - **A/B Testing**: For titles, meta, CTAs (Google Optimize or VWO — respect privacy).
 - **Negative SEO Protection**: Monitor backlinks for spam, disavow if needed. Secure site to prevent hacking (which can tank rankings).
 
+#### 3.5.1 Mandatory GA4 + Search Console Setup (All Sites)
+
+Run this checklist for every new website and every major relaunch.
+
+1. **Create/verify Google Search Console domain property**
+  - Prefer a **Domain property** (`example.com`) via DNS TXT verification so all protocols/subdomains are covered.
+  - Keep an HTML verification file in the repo root as a fallback for URL-prefix verification continuity.
+
+2. **Confirm crawl endpoints before submission**
+  - Ensure `robots.txt` contains a valid, live sitemap URL (for example `https://www.example.com/sitemap.xml`).
+  - Do not reference compressed sitemap paths unless that exact `.gz` file is actually deployed.
+  - Ensure the canonical host in sitemap URLs matches the production canonical domain.
+
+3. **Submit sitemap in Search Console**
+  - In Search Console → Sitemaps, submit the canonical sitemap URL.
+  - After deploys that add major URL groups, re-check sitemap status and coverage.
+
+4. **Set up Google Analytics 4 (GA4)**
+  - Create a GA4 property and web data stream for the canonical production domain.
+  - Install GA4 via external JavaScript (no inline scripts) to stay compatible with strict CSP.
+  - Store the measurement ID (`G-XXXXXXXXXX`) in a single config location so all pages use one source of truth.
+  - Enable conversion events for primary business outcomes (purchase, lead, checkout start, contact submit).
+
+5. **Link Google products**
+  - Link GA4 to Search Console.
+  - Link GA4 to Google Ads if ads are used.
+  - Confirm shared timezone/currency settings are correct before reporting periods begin.
+
+6. **Launch validation (same day)**
+  - Confirm Search Console verification is active.
+  - Confirm sitemap status is `Success`.
+  - Confirm GA4 Realtime receives page views from live traffic.
+  - Inspect one key URL in Search Console URL Inspection and request indexing if needed.
+
+7. **Weekly operating cadence (mandatory)**
+  - Search Console: Coverage, Enhancements, Core Web Vitals, Manual Actions, Security Issues.
+  - GA4: conversion trend, landing-page performance, engagement drop-offs, anomalous traffic.
+  - Fix critical errors in the same sprint; do not allow unresolved indexing or measurement drift.
+
+Implementation notes:
+- Keep analytics scripts external to avoid CSP breakage on production static sites.
+- Use one canonical property and one canonical sitemap per production domain.
+- No SEO workflow can guarantee a permanent #1 ranking; the repeatable path is superior technical quality, strong content, authority growth, and continuous iteration.
+
 ### 3.6 Google Ranking Factors Prioritization (2026+)
 1. **Helpful, People-First Content** (E-E-A-T + original research + user satisfaction).
 2. **Page Experience** (Core Web Vitals + mobile + HTTPS + no intrusive interstitials).
@@ -588,6 +632,7 @@ jobs:
 - `<title>` values must be unique across indexable pages.
 - Meta descriptions must be unique across indexable pages.
 - Pages with robots `noindex` are excluded from this check.
+- Generated sitemap template files under `sitemap/pages/mods/` are excluded so this gate stays focused on real indexable pages.
 
 This gate is intentionally strict so title/meta quality does not drift over time.
 
