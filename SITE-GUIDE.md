@@ -423,6 +423,84 @@ grep -oE 'href="[^"]*\.(css|webp|js)\?v=[^"]*"' public/index.html | head
 ---
 
 ## 5. Development Workflow & Quality Gates
+
+### 5.1 Lighthouse CI (Mandatory for Every Repo)
+
+Every site repository **must** include Lighthouse CI running as a GitHub Actions workflow on every push and PR to `main`. This ensures no code change silently regresses performance, accessibility, SEO, or best practices scores.
+
+**Required files** (add both to every new repo):
+
+**`.github/workflows/lighthouse.yml`**
+```yaml
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.14.x
+
+      - name: Run Lighthouse CI
+        run: lhci autorun
+```
+
+**`.lighthouserc.json`** (customize URLs for each site):
+```json
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": ".",
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/about.html",
+        "http://localhost/contact.html"
+      ]
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "categories:performance": ["warn", {"minScore": 0.85}],
+        "categories:accessibility": ["error", {"minScore": 0.90}],
+        "categories:best-practices": ["warn", {"minScore": 0.85}],
+        "categories:seo": ["error", {"minScore": 0.95}]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
+```
+
+**Notes on configuration**:
+- Change `staticDistDir` to `"public"` for sites that build into a `public/` directory.
+- For sites with a Python or Node build step, add the build step before the `lhci autorun` step.
+- Always include the 4–6 most important pages (home, main content, contact, checkout/cart if present).
+- Accessibility and SEO gates are set to `"error"` (blocks PR) — do not lower these.
+- Performance and best-practices are `"warn"` (reports but does not block).
+
+**Temporary baseline rollout note**:
+- During baseline rollout, run Lighthouse in non-blocking mode so reports are collected without failing PRs (for example, allow `lhci autorun` to return non-zero while the workflow still exits `0`).
+- After remediation work is complete, switch back to blocking mode and enforce `"error"` assertions for accessibility and SEO.
+
+**Reading Lighthouse CI results**:
+- Each run uploads a public report URL visible in the GitHub Actions log under "Lighthouse CI".
+- Click the URL to see the full report with exact scores and specific issues to fix.
+- Any `error`-level assertion failure blocks PR merging until fixed.
+
 1. **Local Development**: Dockerized environments, hot reload, linting (ESLint + Stylelint + Prettier), TypeScript strict mode.
 2. **CI/CD Pipeline** (GitHub Actions / GitLab CI):
    - Automated tests (unit, integration, E2E with Playwright/Cypress — include a11y and visual regression).
