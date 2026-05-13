@@ -1,23 +1,23 @@
 name: Lighthouse CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 1 * *'
+
+permissions:
+  contents: read
+  statuses: write
+  checks: write
+  pull-requests: write
 
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Build site
-        run: python _build.py
+          fetch-depth: 0
 
       - uses: actions/setup-node@v5
         with:
@@ -27,12 +27,14 @@ jobs:
         run: npm install -g @lhci/cli@0.14.x
 
       - name: Run Lighthouse CI (non-blocking baseline)
+        env:
+          LHCI_GITHUB_TOKEN: ${{ github.token }}
         run: |
           set +e
-          lhci autorun
+          ./scripts/run-lhci.sh
           status=$?
           if [ $status -ne 0 ]; then
             echo "Lighthouse reported issues (non-blocking baseline mode)."
-            echo "Review the report URLs in this log for exact fixes."
+            echo "Review the report URLs and GitHub status checks for exact fixes."
           fi
           exit 0

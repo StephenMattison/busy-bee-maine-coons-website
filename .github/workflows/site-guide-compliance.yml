@@ -1,0 +1,33 @@
+name: Site Guide Compliance
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'SITE-GUIDE.md'
+      - 'Strict-Per-Site-Compliance-Audit-Procedure.md'
+      - 'Simple-Per-Site-Compliance-Audit-Procedure.md'
+      - '.github/workflows/site-guide-compliance.yml'
+      - 'scripts/check-site-guide-compliance.py'
+  push:
+    branches: [main]
+    paths:
+      - 'SITE-GUIDE.md'
+      - 'Strict-Per-Site-Compliance-Audit-Procedure.md'
+      - 'Simple-Per-Site-Compliance-Audit-Procedure.md'
+      - '.github/workflows/site-guide-compliance.yml'
+      - 'scripts/check-site-guide-compliance.py'
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check SITE-GUIDE compliance (titles + meta descriptions)
+        run: python3 scripts/check-site-guide-compliance.py

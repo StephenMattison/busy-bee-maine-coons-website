@@ -426,25 +426,48 @@ grep -oE 'href="[^"]*\.(css|webp|js)\?v=[^"]*"' public/index.html | head
 
 ### 5.1 Lighthouse CI (Mandatory for Every Repo)
 
-Every site repository **must** include Lighthouse CI running as a GitHub Actions workflow on every push and PR to `main`. This ensures no code change silently regresses performance, accessibility, SEO, or best practices scores.
+Every site repository **must** include Lighthouse CI, but the default standard is **low-frequency** execution (manual trigger + monthly schedule) so routine commits are not slowed down by long scans.
 
-**Required files** (add both to every new repo):
+**Canonical source of truth for repo assets**:
+- `templates/lighthouse/.github/workflows/lighthouse.yml`
+- `templates/lighthouse/scripts/run-lhci.sh`
+- `templates/lighthouse/.lighthouserc.json`
+- `templates/compliance/.github/workflows/site-guide-compliance.yml`
+- `templates/compliance/scripts/check-site-guide-compliance.py`
+
+Use the canonical adoption script from the `StephenMattison/site-guide` repo to install the shared workflow and helper into a site repo:
+
+```bash
+./scripts/apply-lighthouse-standard.sh /absolute/path/to/site-repo
+./scripts/apply-lighthouse-standard.sh /absolute/path/to/site-repo public
+```
+
+Use the second form for repos that serve built static output from `public/`.
+
+**Shared workflow standard**:
 
 **`.github/workflows/lighthouse.yml`**
 ```yaml
 name: Lighthouse CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 1 * *'
+
+permissions:
+  contents: read
+  statuses: write
+  checks: write
+  pull-requests: write
 
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v5
         with:
@@ -454,32 +477,46 @@ jobs:
         run: npm install -g @lhci/cli@0.14.x
 
       - name: Run Lighthouse CI
-        run: lhci autorun
+        env:
+          LHCI_GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/run-lhci.sh
 ```
 
-**`.lighthouserc.json`** (customize URLs for each site):
+**`scripts/run-lhci.sh`**
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${LHCI_GITHUB_TOKEN:-}" && -z "${LHCI_GITHUB_APP_TOKEN:-}" ]] && command -v gh >/dev/null 2>&1; then
+  if gh auth status >/dev/null 2>&1; then
+    LHCI_GITHUB_TOKEN="$(gh auth token)"
+    export LHCI_GITHUB_TOKEN
+  fi
+fi
+
+exec npx -y @lhci/cli@0.14.x autorun "$@"
+```
+
+**`.lighthouserc.json`** (baseline; customize per site):
 ```json
 {
   "ci": {
     "collect": {
       "staticDistDir": ".",
-      "url": [
-        "http://localhost/index.html",
-        "http://localhost/about.html",
-        "http://localhost/contact.html"
-      ]
+      "numberOfRuns": 3
     },
     "assert": {
       "preset": "lighthouse:no-pwa",
       "assertions": {
         "categories:performance": ["warn", {"minScore": 0.85}],
-        "categories:accessibility": ["error", {"minScore": 0.90}],
+        "categories:accessibility": ["warn", {"minScore": 0.90}],
         "categories:best-practices": ["warn", {"minScore": 0.85}],
-        "categories:seo": ["error", {"minScore": 0.95}]
+        "categories:seo": ["warn", {"minScore": 0.95}]
       }
     },
     "upload": {
-      "target": "temporary-public-storage"
+      "target": "temporary-public-storage",
+      "uploadUrlMap": true
     }
   }
 }
@@ -487,19 +524,74 @@ jobs:
 
 **Notes on configuration**:
 - Change `staticDistDir` to `"public"` for sites that build into a `public/` directory.
+- Add an explicit `collect.url` array for the 4-6 most important pages once the baseline is stable.
 - For sites with a Python or Node build step, add the build step before the `lhci autorun` step.
-- Always include the 4–6 most important pages (home, main content, contact, checkout/cart if present).
-- Accessibility and SEO gates are set to `"error"` (blocks PR) — do not lower these.
-- Performance and best-practices are `"warn"` (reports but does not block).
+- The workflow must use GitHub's built-in Actions token for remote status checks. Do not create a separate personal token for each site repo.
+- Local runs should use `./scripts/run-lhci.sh` so GitHub CLI auth is reused automatically when available.
+- Once the site is remediated and stable, raise accessibility and SEO assertions from `"warn"` to `"error"`.
+- Default cadence is monthly plus manual runs on demand. If a specific site needs stricter enforcement, that site can opt into per-PR Lighthouse later.
 
-**Temporary baseline rollout note**:
-- During baseline rollout, run Lighthouse in non-blocking mode so reports are collected without failing PRs (for example, allow `lhci autorun` to return non-zero while the workflow still exits `0`).
-- After remediation work is complete, switch back to blocking mode and enforce `"error"` assertions for accessibility and SEO.
+**Execution model**:
+- Default: monthly scheduled run + manual run from Actions tab when you want a fresh audit.
+- Optional stricter mode: per-PR/per-push Lighthouse can be enabled on a per-site basis, but is not required by this baseline standard.
 
 **Reading Lighthouse CI results**:
 - Each run uploads a public report URL visible in the GitHub Actions log under "Lighthouse CI".
+- Each run should also write GitHub status checks like `lhci/url/index.html` when the token setup is correct.
 - Click the URL to see the full report with exact scores and specific issues to fix.
 - Any `error`-level assertion failure blocks PR merging until fixed.
+
+### 5.2 Continuous Site-Guide Compliance (Mandatory)
+
+Every adopted repo must run a separate compliance workflow for **site-guide sync updates** (plus manual runs) to enforce guide rules without adding noise to routine website PRs.
+
+**`.github/workflows/site-guide-compliance.yml`**
+```yaml
+name: Site Guide Compliance
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'SITE-GUIDE.md'
+      - 'Strict-Per-Site-Compliance-Audit-Procedure.md'
+      - 'Simple-Per-Site-Compliance-Audit-Procedure.md'
+      - '.github/workflows/site-guide-compliance.yml'
+      - 'scripts/check-site-guide-compliance.py'
+  push:
+    branches: [main]
+    paths:
+      - 'SITE-GUIDE.md'
+      - 'Strict-Per-Site-Compliance-Audit-Procedure.md'
+      - 'Simple-Per-Site-Compliance-Audit-Procedure.md'
+      - '.github/workflows/site-guide-compliance.yml'
+      - 'scripts/check-site-guide-compliance.py'
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check SITE-GUIDE compliance (titles + meta descriptions)
+        run: python3 scripts/check-site-guide-compliance.py
+```
+
+**`scripts/check-site-guide-compliance.py`** (enforced automatically):
+- All indexable HTML pages must have a non-empty `<title>`.
+- All indexable HTML pages must have a non-empty `meta name="description"`.
+- `<title>` values must be unique across indexable pages.
+- Meta descriptions must be unique across indexable pages.
+- Pages with robots `noindex` are excluded from this check.
+
+This gate is intentionally strict so title/meta quality does not drift over time.
+
+By default this gate is not run for unrelated day-to-day page edits unless you trigger it manually.
 
 1. **Local Development**: Dockerized environments, hot reload, linting (ESLint + Stylelint + Prettier), TypeScript strict mode.
 2. **CI/CD Pipeline** (GitHub Actions / GitLab CI):
