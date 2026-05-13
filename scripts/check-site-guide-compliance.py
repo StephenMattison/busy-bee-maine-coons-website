@@ -31,6 +31,19 @@ IGNORED_DIRS = {
     "build",
 }
 
+IGNORED_PATH_PREFIXES = (
+    "sitemap/pages/mods/",
+)
+
+IGNORED_FILE_SUFFIXES = (
+    "_tpl.html",
+)
+
+IGNORED_BASENAME_PATTERNS = (
+    r"google[0-9a-f]{16}\.html",
+    r"Gensw_[0-9a-fA-F]+\.html",
+)
+
 
 @dataclass
 class PageMeta:
@@ -79,7 +92,18 @@ class MetaParser(HTMLParser):
 
 def should_skip(path: Path) -> bool:
     parts = set(path.parts)
-    return bool(parts & IGNORED_DIRS)
+    if parts & IGNORED_DIRS:
+        return True
+
+    path_str = path.as_posix()
+    if path_str.endswith(IGNORED_FILE_SUFFIXES):
+        return True
+
+    if any(path_str.startswith(prefix) for prefix in IGNORED_PATH_PREFIXES):
+        return True
+
+    basename = path.name
+    return any(re.fullmatch(pattern, basename) for pattern in IGNORED_BASENAME_PATTERNS)
 
 
 def collect_html_files(root: Path) -> list[Path]:
