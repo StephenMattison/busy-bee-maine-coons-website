@@ -280,6 +280,14 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - If a page targets social sharing, keep the Open Graph image current and use a concise, compelling title/description pair.
 - **Hreflang** (if multilingual): Proper implementation.
 
+##### Authoring procedure (mandatory)
+- Titles and meta descriptions are an SEO-engineering deliverable, not a content-author chore. They are produced and maintained by whoever is writing the page or running the build, following the patterns above.
+- Hand-writing per page is acceptable only on small static sites (roughly under 30 indexable pages). Above that scale, generate them programmatically from a per-page data source (JSON, YAML, CSV, CMS field, product database) plus a template that enforces the recommended pattern. This guarantees uniqueness and keeps every page in sync as data changes.
+- Never copy a title or description from one page to another as a starting point. Always derive each from that page's own primary keyword, intent, and differentiator.
+- Re-validate titles and descriptions after every content change, every product import, and every template refactor. Bulk imports are the most common source of duplicate-title and duplicate-description regressions.
+- The canonical compliance script (`scripts/check-site-guide-compliance.py`, installed via `apply-lighthouse-standard.sh`) enforces presence and uniqueness of `<title>` and `<meta name="description">` across all indexable pages and runs in CI on every adopted repo. A failed compliance run blocks deploy; fix the duplicates or missing entries before retrying.
+- When migrating or restructuring a site, run the compliance script locally before pushing — duplicates from a previous iteration must be resolved as part of the migration, not deferred.
+
 ### 3.3 Technical SEO (Foundation for Crawlability & Rankings)
 - **Core Web Vitals** (must pass "Good" thresholds):
   - LCP ≤ 2.5s (optimize hero images, critical CSS, font-display:swap, preconnect).
@@ -292,7 +300,8 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - **Mobile-First & Responsive**: Google uses mobile index primarily. Test on real devices. Touch targets ≥44x44px, no horizontal scroll at 320px.
 - **Crawlability**:
   - `robots.txt` allows all important paths, blocks admin/login.
-  - XML Sitemap (auto-generated, submitted via Search Console, <50k URLs or split).
+  - XML Sitemap: **must explicitly list every indexable URL** — homepage, all product/landing/category pages, shop. Do NOT rely on auto-generation tools without verifying the output URL count matches the actual page count. A sitemap with missing pages is a silent SEO failure: Google will only index what it finds in the sitemap. After every deploy that adds new pages, update the sitemap and re-submit in Search Console.
+  - Sitemap URL count check: run `grep -c "<loc>" sitemap.xml` and verify it equals the total number of indexable pages.
   - Clean HTML (no excessive JS rendering for critical content — SSR or SSG preferred for SEO-critical pages).
   - Proper status codes (200 OK, 301/308 for redirects, 404 for missing, 410 for gone).
   - No broken links (internal or external) — monitor with Screaming Frog or Ahrefs.
@@ -346,6 +355,7 @@ Run this checklist for every new website and every major relaunch.
 6. **Launch validation (same day)**
   - Confirm Search Console verification is active.
   - Confirm sitemap status is `Success`.
+  - **Verify sitemap URL count** — run `grep -c "<loc>" sitemap.xml` and confirm it matches the total number of indexable pages. A mismatch means pages are missing and will not be indexed by Google.
   - Confirm GA4 Realtime receives page views from live traffic.
   - Inspect one key URL in Search Console URL Inspection and request indexing if needed.
 
