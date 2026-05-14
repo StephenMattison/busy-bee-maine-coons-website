@@ -292,7 +292,8 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - **Mobile-First & Responsive**: Google uses mobile index primarily. Test on real devices. Touch targets ≥44x44px, no horizontal scroll at 320px.
 - **Crawlability**:
   - `robots.txt` allows all important paths, blocks admin/login.
-  - XML Sitemap (auto-generated, submitted via Search Console, <50k URLs or split).
+  - XML Sitemap: **must explicitly list every indexable URL** — homepage, all product/landing/category pages, shop. Do NOT rely on auto-generation tools without verifying the output URL count matches the actual page count. A sitemap with missing pages is a silent SEO failure: Google will only index what it finds in the sitemap. After every deploy that adds new pages, update the sitemap and re-submit in Search Console.
+  - Sitemap URL count check: run `grep -c "<loc>" sitemap.xml` and verify it equals the total number of indexable pages.
   - Clean HTML (no excessive JS rendering for critical content — SSR or SSG preferred for SEO-critical pages).
   - Proper status codes (200 OK, 301/308 for redirects, 404 for missing, 410 for gone).
   - No broken links (internal or external) — monitor with Screaming Frog or Ahrefs.
@@ -346,6 +347,7 @@ Run this checklist for every new website and every major relaunch.
 6. **Launch validation (same day)**
   - Confirm Search Console verification is active.
   - Confirm sitemap status is `Success`.
+  - **Verify sitemap URL count** — run `grep -c "<loc>" sitemap.xml` and confirm it matches the total number of indexable pages. A mismatch means pages are missing and will not be indexed by Google.
   - Confirm GA4 Realtime receives page views from live traffic.
   - Inspect one key URL in Search Console URL Inspection and request indexing if needed.
 
