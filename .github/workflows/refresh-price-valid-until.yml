@@ -1,0 +1,46 @@
+name: Refresh priceValidUntil
+
+# Self-healing automation: keeps Product schema priceValidUntil dates current.
+# Runs monthly + on demand. Bumps any priceValidUntil that's within 6 months of
+# expiring to today+1y. Commits + pushes only if anything changed.
+# Safe no-op on repos with no Product schema.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 04:17 UTC on the 3rd of each month — offset to avoid GitHub Actions traffic spikes
+    - cron: '17 4 3 * *'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Refresh priceValidUntil dates
+        run: python3 scripts/refresh-price-valid-until.py
+
+      - name: Commit and push if changed
+        run: |
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No priceValidUntil changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: auto-refresh Product schema priceValidUntil to today+1y
+
+Run by .github/workflows/refresh-price-valid-until.yml. Keeps offers eligible
+for Google Merchant Listings rich results (Google demotes products with
+expired priceValidUntil)."
+          git push
