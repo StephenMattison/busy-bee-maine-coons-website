@@ -75,6 +75,21 @@ All websites **must** meet or exceed WCAG 2.2 Level AA. Aim for AAA on critical 
 
 Security is foundational. We build "secure by design" with defense-in-depth. No site launches without passing independent security audit (OWASP ZAP, Burp Suite, Qualys, etc.) and achieving A+ on SSL Labs, SecurityHeaders.com, and Mozilla Observatory.
 
+### 2.0 Social Cards, Favicons, and Third-Party Cache Busting (Mandatory)
+- You cannot force Facebook, X, Slack, iMessage, Discord, LinkedIn, or browser favicon caches to purge immediately on demand from your server. Any guide claiming you can is wrong.
+- The required solution on every site is versioned asset URLs for all social preview images and favicon references. When any social card image or favicon changes, the URL must also change.
+- Every page must reference social preview images and favicon assets with an explicit version query string, for example: `/assets/img/social-cards/share-card.jpg?v=20260619-1` and `/assets/favicons/favicon-32x32.png?v=20260619-1`.
+- The web manifest icon `src` values must also carry the same version query string.
+- HTML pages must ship with `Cache-Control: public, max-age=0, must-revalidate`.
+- Social-card assets and favicon assets must also ship with `Cache-Control: public, max-age=0, must-revalidate` so browsers and intermediaries revalidate aggressively.
+- When you replace a favicon or social image, do all of the following before deploy is complete:
+  1. Replace the image file.
+  2. Bump the shared version string everywhere that references that asset.
+  3. Deploy the updated HTML and headers.
+  4. If needed, manually request refreshes in platform debuggers such as Facebook Sharing Debugger, LinkedIn Post Inspector, and X Card Validator. These tools help, but versioned URLs are the real fix.
+- Never rely on keeping the same asset URL for changed share images or favicons. Some crawlers and clients keep those cached for weeks or months.
+- This rule is mandatory for every Stephen Mattison site.
+
 ### 2.1 HTTPS & Transport Security (Mandatory)
 - Enforce HTTPS site-wide with 301 redirects.
 - HSTS header: `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
