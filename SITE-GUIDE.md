@@ -53,6 +53,12 @@ All websites **must** meet or exceed WCAG 2.2 Level AA. Aim for AAA on critical 
   - Visible focus indicator (never remove `outline` or use `outline: none` without replacement).
   - Logical tab order matching visual/layout order.
   - Skip-to-content link at top.
+  - Skip link must be hidden off-screen until focused (do not leave a visible sliver at the top of the viewport).
+  - Recommended skip-link CSS baseline:
+    ```css
+    .skip-link { position: absolute; top: -200px; left: 12px; z-index: 1000; }
+    .skip-link:focus { top: 12px; }
+    ```
   - No keyboard traps (e.g., modals must trap focus properly with `aria-modal` and focus management).
 - **Forms & Input**:
   - Every form control has visible `<label>` (or `aria-label`/`aria-labelledby`).
@@ -199,6 +205,13 @@ Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin
 - `Vary: Origin` tells CDN/proxies to cache responses per origin, which is required alongside a non-wildcard ACAO.
 - Only widen ACAO to `*` for a specific path prefix that is genuinely a public API (e.g. `/api/public/*`) — never globally.
 - After deploy, verify: `curl -sI https://<canonical-domain>/ | grep -i access-control` — it must show your domain, not `*`.
+- Add an exact-match domain check to catch typos (`growbru.com` vs `growbrew.com` type mistakes):
+
+```bash
+EXPECTED_ORIGIN="https://<canonical-domain>"
+ACTUAL_ORIGIN="$(curl -sI https://<canonical-domain>/ | tr -d '\r' | awk -F': ' 'tolower($1)=="access-control-allow-origin" {print $2}')"
+[[ "$ACTUAL_ORIGIN" == "$EXPECTED_ORIGIN" ]] || { echo "ACAO mismatch: $ACTUAL_ORIGIN"; exit 1; }
+```
 
 **Launch gate:** Missing or wildcard ACAO on the global `/*` block = block launch until fixed.
 
@@ -240,6 +253,7 @@ Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin
 ### 2.7 Content Management & Third-Party Risks
 - If using CMS (WordPress, etc.): Hardened config, minimal plugins, automatic core/plugin updates, security plugins (Wordfence, Sucuri), file integrity monitoring.
 - Third-party scripts: Audit all (Google Tag Manager, analytics, chat, ads). Use Subresource Integrity (SRI) hashes. Prefer self-hosted where possible.
+- Never load third-party SDKs globally unless the page actively uses them. Load on demand for the exact feature/page to reduce risk surface and avoid unnecessary Lighthouse Best Practices noise.
 - No eval(), no dangerous DOM manipulation.
 
 **Security Audit Gate**: Independent third-party audit (or automated + manual by security engineer) required before any production deployment. Remediate all findings (Critical/High = block launch).
@@ -276,6 +290,7 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 
 #### 3.2.1 Page Title and Meta Description Rules
 - Every indexable page must have a unique `<title>` and unique `<meta name="description">`.
+- Every indexable page should include `<meta name="robots" content="index,follow">` unless intentionally noindexed.
 - Start the title with the most important keyword phrase for that page, then finish with the brand.
 - Keep titles readable and specific; do not stuff keywords or repeat the same phrase twice.
 - Write descriptions for users first: summarize the page, include the main keyword naturally, and make the benefit or action clear.
@@ -673,6 +688,19 @@ By default this gate is not run for unrelated day-to-day page edits unless you t
 3. **Staging Environment**: Mirror production exactly. Full manual + automated QA including screen reader, keyboard, performance under load.
 4. **Production Deployment**: Blue-green or canary. Feature flags for risky changes. Rollback <5 min.
 5. **Post-Launch**: 24/7 monitoring, weekly audits, monthly comprehensive review (WCAG, security headers, SEO health, Core Web Vitals trends).
+
+### 5.3 Production Console Hygiene (Mandatory)
+- Keep debug logging available in development, but gate it in production (for example by hostname, environment flag, or build mode).
+- Do not ship persistent noisy `console.log` output in production application flows.
+- A small helper is the preferred pattern:
+
+```js
+const DEBUG_LOG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const debugLog = (...args) => { if (DEBUG_LOG) console.log(...args); };
+```
+
+- Replace non-essential `console.log(...)` calls with `debugLog(...)`.
+- Keep `console.error(...)` for real runtime failures that require investigation.
 
 ---
 
