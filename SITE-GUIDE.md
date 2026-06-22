@@ -702,6 +702,45 @@ const debugLog = (...args) => { if (DEBUG_LOG) console.log(...args); };
 - Replace non-essential `console.log(...)` calls with `debugLog(...)`.
 - Keep `console.error(...)` for real runtime failures that require investigation.
 
+### 5.4 Playwright Rapid Validation Protocol (Mandatory for Fast Web QA)
+- Use browser automation (Playwright) as the default first-pass validator after UI edits, bug fixes, and production regressions.
+- Goal: reduce manual QA time, catch breakage early, and verify behavior consistently across flows.
+
+#### 5.4.1 When to Use
+- After any UI/UX change affecting layout, filters, forms, navigation, cart/checkout, auth, or dashboard interactions.
+- When a user reports "it looks broken" or "button does not work" and reproduction is unclear.
+- Before and after production deployments when cache/versioning changes are involved.
+
+#### 5.4.2 Cost-Control Rules (Token/Credit Efficiency)
+- Start with focused checks: validate only the modified flow first (not full-site sweeps).
+- Reuse an open browser page/session whenever possible instead of opening many tabs.
+- Prefer short assertions (state text, element visibility, count, URL hash) over large page dumps.
+- Escalate in tiers:
+1. Smoke check (one happy path).
+2. Critical edge path check.
+3. Broader regression only if failures are found.
+- Stop once acceptance criteria are proven; avoid redundant re-runs.
+
+#### 5.4.3 Standard Fast Validation Sequence
+1. Load target page and wait for stable render.
+2. Verify versioned assets are current (JS/CSS query versions when relevant).
+3. Execute the exact user journey tied to the change.
+4. Assert expected UI/output state with specific checks.
+5. Capture a concise pass/fail summary with affected components.
+6. If failed: fix, rerun the minimal failing step, then rerun the smoke path.
+
+#### 5.4.4 Required Assertions by Change Type
+- Data/listing changes: result count, expected item presence, sort order, filter behavior.
+- Interaction changes: click handlers, keyboard access, modal open/close, persisted state.
+- Responsive changes: at least one mobile-width and one desktop-width check for overflow/wrapping.
+- Deployment checks: verify production payload/version and one user-visible behavior.
+
+#### 5.4.5 Reporting Format (Keep It Short)
+- Checked flow(s)
+- Assertion results (pass/fail)
+- Environment checked (local/staging/production)
+- Residual risk (if any)
+
 ---
 
 ## 6. Tools & Resources (Approved Stack)
