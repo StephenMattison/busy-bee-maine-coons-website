@@ -318,6 +318,49 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - The canonical compliance script (`scripts/check-site-guide-compliance.py`, installed via `apply-lighthouse-standard.sh`) enforces presence and uniqueness of `<title>` and `<meta name="description">` across all indexable pages and runs in CI on every adopted repo. A failed compliance run blocks deploy; fix the duplicates or missing entries before retrying.
 - When migrating or restructuring a site, run the compliance script locally before pushing — duplicates from a previous iteration must be resolved as part of the migration, not deferred.
 
+#### 3.2.2 Cross-Platform Social Meta Standard (Mandatory)
+- Every indexable page must include complete Open Graph and Twitter/X meta tags. This is required for share previews across Facebook, Instagram DMs, WhatsApp, iMessage, Slack, Discord, LinkedIn, X, Pinterest, and most messaging apps.
+- Browser choice (Safari, Firefox, Chrome, Edge, Linux browsers) does not change crawler interpretation of these tags. Metadata quality must be consistent regardless of client/browser.
+- Required tags on every indexable page:
+  - `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`
+  - `<meta property="og:title" content="...">`
+  - `<meta property="og:description" content="...">`
+  - `<meta property="og:type" content="website">` (or `product` / `article` when appropriate)
+  - `<meta property="og:url" content="https://canonical-url">`
+  - `<meta property="og:image" content="https://...">` (absolute URL)
+  - `<meta property="og:image:alt" content="...">`
+  - `<meta property="og:site_name" content="BrandName">`
+  - `<meta property="og:locale" content="en_US">`
+  - `<meta name="twitter:card" content="summary_large_image">`
+  - `<meta name="twitter:site" content="@handle">` (if brand handle exists)
+  - `<meta name="twitter:title" content="...">`
+  - `<meta name="twitter:description" content="...">`
+  - `<meta name="twitter:image" content="https://...">`
+  - `<meta name="twitter:image:alt" content="...">`
+- Meta keywords note:
+  - `<meta name="keywords">` is optional and not a primary ranking signal for modern search engines. Prioritize title, description, canonical, robots, structured data, and on-page relevance.
+- Social image requirements:
+  - Use a stable, crawlable HTTPS absolute URL (never relative path).
+  - Preferred size: 1200x630 (minimum 600x315).
+  - Keep important text/logo inside safe center area; avoid tiny text.
+  - Use unique image per product/category where possible.
+  - Keep file size compressed for fast fetch and reliable preview generation.
+- Content alignment rules:
+  - `og:title` and `twitter:title` should match page title intent and remain human-readable.
+  - `og:description` and `twitter:description` should mirror page meta description unless a shorter social variant improves clarity.
+  - `og:url` must always equal canonical URL.
+  - If canonical changes, update OG/Twitter URL fields in the same commit.
+- Platform coverage notes:
+  - Facebook, LinkedIn, Pinterest, and many chat apps prioritize Open Graph.
+  - X uses Twitter cards (with Open Graph fallback).
+  - Instagram feed posts do not read page meta tags directly, but link previews in DMs/apps and shared links still depend on OG/Twitter tags.
+  - TikTok does not provide full-page metadata guarantees for ranking, but shared-link previews across social/messaging ecosystems still depend on OG/Twitter fields.
+- Validation checklist before deploy:
+  - Confirm all required OG/Twitter tags exist on every indexable page.
+  - Validate preview with Facebook Sharing Debugger, X Card Validator, and LinkedIn Post Inspector.
+  - Re-scrape pages after metadata updates to clear platform cache.
+  - Verify image URL returns HTTP 200 and correct MIME type.
+
 ### 3.3 Technical SEO (Foundation for Crawlability & Rankings)
 - **Core Web Vitals** (must pass "Good" thresholds):
   - LCP ≤ 2.5s (optimize hero images, critical CSS, font-display:swap, preconnect).
