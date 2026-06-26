@@ -319,14 +319,39 @@ Goal: Dominate target keywords with helpful, authoritative, technically flawless
 - When migrating or restructuring a site, run the compliance script locally before pushing — duplicates from a previous iteration must be resolved as part of the migration, not deferred.
 
 ### 3.3 Technical SEO (Foundation for Crawlability & Rankings)
-- **Core Web Vitals** (must pass "Good" thresholds):
-  - LCP ≤ 2.5s (optimize hero images, critical CSS, font-display:swap, preconnect).
-  - INP (Interaction to Next Paint, replacing FID) ≤ 200ms (minimize main-thread work, defer non-critical JS, use web workers).
-  - CLS ≤ 0.1 (reserve space for images/ads, avoid layout shifts from fonts/animations).
-- **Page Speed**:
-  - Lighthouse Performance ≥95 (ideally 100). Use CDN (Cloudflare, Fastly, Akamai), Brotli/Gzip, image optimization (Squoosh, ImageOptim, Cloudinary), critical CSS inlining, JS code-splitting, tree-shaking.
-  - Preload key resources (`<link rel="preload">` for fonts, LCP image).
-  - HTTP/3, early hints where supported.
+#### Core Web Vitals (CWV) – Best-in-Class Requirements (Mandatory for All Sites)
+
+Core Web Vitals are non-negotiable. Every page and component must be engineered for the absolute best possible scores, not merely "good". Target significantly better than Google's thresholds for competitive advantage and superior user experience:
+
+- LCP: Target ≤ 1.8 s (excellent) on both mobile and desktop. Prioritize above-the-fold content, especially product heroes and research request forms.
+- INP: Target ≤ 150 ms. Every interactive element (buttons, forms, research request flows, filters) must feel instant.
+- CLS: Target ≤ 0.05. Zero unexpected layout shifts on any page, including dynamic Supabase-loaded content and product listings.
+
+These metrics directly impact Google ranking under Page Experience signals and conversion rates. Every new site, page, or component must be built to these elite standards from the first line of code.
+
+Measurement (required on every build):
+- Run Lighthouse (performance + accessibility) and PageSpeed Insights on mobile + desktop before any deployment.
+- Enable and regularly review Cloudflare Web Analytics real-user metrics.
+- Monitor Google Search Console Core Web Vitals report.
+- Re-test after any Supabase integration or dynamic content changes.
+
+Platform-agnostic rules (apply to all current and future sites regardless of hosting):
+- Mobile-first, responsive design with touch-friendly interactions.
+- Optimize all images: proper sizing, modern formats (AVIF/WebP), width/height attributes, native lazy loading, and fetchpriority on LCP elements.
+- Critical CSS inlined; all non-critical JavaScript deferred or loaded asynchronously.
+- Font loading with font-display: swap and preload of key fonts only.
+- Reserve space for all dynamic or loaded elements (images, forms, Supabase data) using aspect-ratio, min-height, or skeleton loaders to eliminate layout shift.
+- Minimize render-blocking resources.
+- Batch and optimize all API/Supabase calls; avoid blocking the main thread.
+- Test and optimize specifically for research request forms, product pages, and e-commerce flows for fast INP and conversion.
+
+Current primary stack optimizations (Cloudflare Pages + Supabase – apply these now and whenever using this stack):
+- Use Cloudflare Image Optimization or native responsive images with transformations.
+- Leverage Cloudflare edge caching and Cache Rules aggressively for all static assets and, where safe, dynamic responses.
+- Consider Pages Functions for proxying or caching Supabase queries at the edge when it improves LCP or INP.
+- Take full advantage of global edge delivery for lowest possible latency on all assets and API responses.
+
+This section applies to every website build going forward. No exceptions. Performance must be best-in-class, not average.
 - **Mobile-First & Responsive**: Google uses mobile index primarily. Test on real devices. Touch targets ≥44x44px, no horizontal scroll at 320px.
 - **Crawlability**:
   - `robots.txt` allows all important paths, blocks admin/login.
