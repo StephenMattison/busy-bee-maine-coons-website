@@ -131,6 +131,16 @@ Our standard CSP omits `'unsafe-inline'` from `script-src`. This is correct and 
 - The only inline `<script>` allowed in HTML is `<script type="application/ld+json">…</script>` for structured data.
 - If a third-party snippet truly requires inline JS, use a CSP hash or nonce for that exact snippet. Never weaken policy with `'unsafe-inline'`.
 
+**Cloudflare Challenge Platform compatibility (mandatory):**
+- Cloudflare may inject inline JS from `/cdn-cgi/challenge-platform/scripts/jsd/main.js`.
+- If your `script-src` contains both `'unsafe-inline'` and script hashes/nonces, browsers ignore `'unsafe-inline'`, which can still block Cloudflare-injected inline JS and trigger Lighthouse Best Practices failures (`errors-in-console`, `inspector-issues`).
+- Use one strategy per environment:
+  1. **Strict CSP strategy (preferred):** keep hashes/nonces and disable JS challenge injection on normal page traffic.
+  2. **Compatibility strategy:** keep `'unsafe-inline'` and remove script hashes/nonces from `script-src`.
+- Verify after deploy with:
+  - `curl -sI https://<canonical-domain>/ | grep -i content-security-policy`
+  - Lighthouse Best Practices on the live homepage.
+
 **Standard implementation pattern:**
 
 ```html
@@ -179,7 +189,7 @@ Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self), usb=(), interest-cohort=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), autoplay=(self), encrypted-media=(), fullscreen=(self)
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self), usb=(), interest-cohort=(), accelerometer=(), gyroscope=(), magnetometer=(), autoplay=(self), encrypted-media=(), fullscreen=(self)
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-site
   Access-Control-Allow-Origin: https://<canonical-domain>
@@ -203,6 +213,7 @@ Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin
 - `Access-Control-Allow-Origin` must be your exact canonical domain — never `*`.
 - `Cross-Origin-Resource-Policy: same-site` prevents your assets being hotlinked or embedded by third-party pages.
 - `Vary: Origin` tells CDN/proxies to cache responses per origin, which is required alongside a non-wildcard ACAO.
+- Do not include deprecated or unrecognized `Permissions-Policy` features (for example `ambient-light-sensor`) because they trigger DevTools issues and can reduce Lighthouse Best Practices.
 - Only widen ACAO to `*` for a specific path prefix that is genuinely a public API (e.g. `/api/public/*`) — never globally.
 - After deploy, verify: `curl -sI https://<canonical-domain>/ | grep -i access-control` — it must show your domain, not `*`.
 - Add an exact-match domain check to catch typos (`growbru.com` vs `growbrew.com` type mistakes):
@@ -726,6 +737,25 @@ const debugLog = (...args) => { if (DEBUG_LOG) console.log(...args); };
 
 - Replace non-essential `console.log(...)` calls with `debugLog(...)`.
 - Keep `console.error(...)` for real runtime failures that require investigation.
+
+### 5.3.1 Lighthouse Best Practices Recovery Runbook (Mandatory)
+- Use this exact flow whenever Best Practices drops below 100 on a live site.
+
+1. Run a live best-practices-only audit and save JSON output.
+2. Read failing audit IDs first (`errors-in-console`, `inspector-issues`, `deprecations`, etc.).
+3. If `errors-in-console` mentions CSP inline blocking, inspect live `Content-Security-Policy` and match it to source control `_headers`.
+4. If `Permissions-Policy` warnings appear, remove deprecated/unrecognized feature tokens.
+5. If issues come from `/cdn-cgi/challenge-platform/...`, treat as Cloudflare challenge injection and apply the CSP compatibility rule in section 2.2.1.
+6. Trigger a fresh deployment, then purge edge cache.
+7. Re-check live headers and rerun Lighthouse on the live domain (not localhost) before sign-off.
+
+Required validation commands:
+```bash
+curl -sI https://<canonical-domain>/ | rg -i "content-security-policy|permissions-policy|cf-cache-status"
+npx --yes lighthouse https://<canonical-domain>/ --only-categories=best-practices --quiet --chrome-flags='--headless=new --no-sandbox'
+```
+
+Launch gate: do not close remediation until live-domain Best Practices and console/Issues panel are clean.
 
 ### 5.4 Playwright Rapid Validation Protocol (Mandatory for Fast Web QA)
 - Use browser automation (Playwright) as the default first-pass validator after UI edits, bug fixes, and production regressions.
