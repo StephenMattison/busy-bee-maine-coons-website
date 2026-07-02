@@ -131,6 +131,16 @@ Our standard CSP omits `'unsafe-inline'` from `script-src`. This is correct and 
 - The only inline `<script>` allowed in HTML is `<script type="application/ld+json">…</script>` for structured data.
 - If a third-party snippet truly requires inline JS, use a CSP hash or nonce for that exact snippet. Never weaken policy with `'unsafe-inline'`.
 
+**Cloudflare Challenge Platform compatibility (mandatory):**
+- Cloudflare may inject inline JS from `/cdn-cgi/challenge-platform/scripts/jsd/main.js`.
+- If your `script-src` contains both `'unsafe-inline'` and script hashes/nonces, browsers ignore `'unsafe-inline'`, which can still block Cloudflare-injected inline JS and trigger Lighthouse Best Practices failures (`errors-in-console`, `inspector-issues`).
+- Use one strategy per environment:
+  1. **Strict CSP strategy (preferred):** keep hashes/nonces and disable JS challenge injection on normal page traffic.
+  2. **Compatibility strategy:** keep `'unsafe-inline'` and remove script hashes/nonces from `script-src`.
+- Verify after deploy with:
+  - `curl -sI https://<canonical-domain>/ | grep -i content-security-policy`
+  - Lighthouse Best Practices on the live homepage.
+
 **Standard implementation pattern:**
 
 ```html
@@ -179,7 +189,7 @@ Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self), usb=(), interest-cohort=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), autoplay=(self), encrypted-media=(), fullscreen=(self)
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self), usb=(), interest-cohort=(), accelerometer=(), gyroscope=(), magnetometer=(), autoplay=(self), encrypted-media=(), fullscreen=(self)
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-site
   Access-Control-Allow-Origin: https://<canonical-domain>
@@ -203,6 +213,7 @@ Cloudflare Pages (and many static hosts) default to `Access-Control-Allow-Origin
 - `Access-Control-Allow-Origin` must be your exact canonical domain — never `*`.
 - `Cross-Origin-Resource-Policy: same-site` prevents your assets being hotlinked or embedded by third-party pages.
 - `Vary: Origin` tells CDN/proxies to cache responses per origin, which is required alongside a non-wildcard ACAO.
+- Do not include deprecated or unrecognized `Permissions-Policy` features (for example `ambient-light-sensor`) because they trigger DevTools issues and can reduce Lighthouse Best Practices.
 - Only widen ACAO to `*` for a specific path prefix that is genuinely a public API (e.g. `/api/public/*`) — never globally.
 - After deploy, verify: `curl -sI https://<canonical-domain>/ | grep -i access-control` — it must show your domain, not `*`.
 - Add an exact-match domain check to catch typos (`growbru.com` vs `growbrew.com` type mistakes):
@@ -727,6 +738,54 @@ const debugLog = (...args) => { if (DEBUG_LOG) console.log(...args); };
 - Replace non-essential `console.log(...)` calls with `debugLog(...)`.
 - Keep `console.error(...)` for real runtime failures that require investigation.
 
+### 5.3.1 Lighthouse Best Practices Recovery Runbook (Mandatory)
+- Use this exact flow whenever Best Practices drops below 100 on a live site.
+
+1. Run a live best-practices-only audit and save JSON output.
+2. Read failing audit IDs first (`errors-in-console`, `inspector-issues`, `deprecations`, etc.).
+3. If `errors-in-console` mentions CSP inline blocking, inspect live `Content-Security-Policy` and match it to source control `_headers`.
+4. If `Permissions-Policy` warnings appear, remove deprecated/unrecognized feature tokens.
+5. If issues come from `/cdn-cgi/challenge-platform/...`, treat as Cloudflare challenge injection and apply the CSP compatibility rule in section 2.2.1.
+6. Trigger a fresh deployment, then purge edge cache.
+7. Re-check live headers and rerun Lighthouse on the live domain (not localhost) before sign-off.
+
+Required validation commands:
+```bash
+curl -sI https://<canonical-domain>/ | rg -i "content-security-policy|permissions-policy|cf-cache-status"
+npx --yes lighthouse https://<canonical-domain>/ --only-categories=best-practices --quiet --chrome-flags='--headless=new --no-sandbox'
+```
+
+Launch gate: do not close remediation until live-domain Best Practices and console/Issues panel are clean.
+
+### 5.3.2 One-Command Operator Workflow (Recommended Standard)
+- To keep operations fast and consistent across all site repos, use one-command shell helpers.
+- These helpers improve execution speed and reduce command mistakes; they do not replace CI, code review, or required launch gates.
+
+Required command set:
+```bash
+siteup
+siteaudit
+sitepush "clear commit message"
+```
+
+Expected behavior:
+1. `siteup`: updates local repo from remote default branch (safe pull with autostash/rebase).
+2. `siteaudit`: runs repo-defined audit scripts (local compliance + Lighthouse where available).
+3. `sitepush`: stages all changes, commits with message, and pushes current branch.
+
+Optional guide-sync command:
+```bash
+./sync-guide.sh
+```
+- Use this when a repo maintains `SITE-GUIDE.md` by copying from a local canonical checkout.
+- If your workflow distributes guide updates by PR into each website repo, merge PR then run `siteup` in local folders.
+
+Operator sequence per repo:
+1. `siteup`
+2. make changes
+3. `siteaudit`
+4. `sitepush "what changed"`
+
 ### 5.4 Playwright Rapid Validation Protocol (Mandatory for Fast Web QA)
 - Use browser automation (Playwright) as the default first-pass validator after UI edits, bug fixes, and production regressions.
 - Goal: reduce manual QA time, catch breakage early, and verify behavior consistently across flows.
@@ -765,6 +824,144 @@ const debugLog = (...args) => { if (DEBUG_LOG) console.log(...args); };
 - Assertion results (pass/fail)
 - Environment checked (local/staging/production)
 - Residual risk (if any)
+
+---
+
+### 5.5 Standard Mobile CSS Patterns (Mandatory — Never Reinvent)
+
+These patterns are derived from working production sites (revengeworks.com et al.). Apply them identically on every new site. Deviation requires explicit justification and a mobile overflow test before merge.
+
+#### 5.5.1 Navbar — Required Structure
+```css
+/* NAVBAR BASE */
+.navbar {
+  position: sticky; top: 0; z-index: 1000;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.navbar-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem; height: 56px;
+}
+
+/* LOGO — must never collapse on mobile */
+.logo {
+  display: flex; align-items: center; gap: 0.5rem;
+  flex-shrink: 0;        /* MANDATORY — prevents logo squishing to 0px */
+  margin-right: auto;    /* pushes nav-actions to far right */
+}
+.logo img { height: 36px; width: auto; display: block; }
+
+/* DESKTOP NAV LINKS — hidden on tablet/phone */
+.nav-links { display: flex; gap: 0.25rem; }
+@media (max-width: 1024px) {
+  .nav-links { display: none; }
+  .mobile-toggle { display: block; }
+}
+
+/* NAV ACTIONS (cart, account, hamburger) */
+.nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+/* MOBILE NAV */
+@media (max-width: 768px) {
+  .navbar-inner { height: 56px; padding: 0 1rem; }
+  .nav-actions  { gap: 0.5rem; }
+  /* Minimum tap targets */
+  .nav-cart, .mobile-toggle, .nav-account {
+    min-width: 44px; min-height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  /* Mobile menu links — large and readable */
+  .mobile-menu a {
+    display: block;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem; font-weight: 600;
+    border-bottom: 1px solid #f1f5f9;
+  }
+}
+```
+
+**Rules:**
+- `flex-shrink: 0` + `margin-right: auto` on `.logo` — non-negotiable. Without this the logo collapses to 0px on phones when nav-actions items overflow the flex row.
+- Never put more than 3 icon buttons in `.nav-actions` on mobile. If you have X/Twitter, account, cart, AND hamburger, hide the decorative ones (X/Twitter) at `≤1024px`.
+- `gap: 0.5rem` minimum between nav-action icons — tighter looks broken.
+
+#### 5.5.2 Hero Section — Mobile Rules
+```css
+.hero {
+  /* Desktop: extra bottom padding to clear absolutely-positioned overlays */
+  padding: 3.5rem 1.5rem 8rem;
+  position: relative; overflow: hidden;
+}
+@media (max-width: 768px) {
+  .hero { padding: 2.5rem 1.25rem 3rem; }
+}
+```
+
+**Hard rules:**
+1. **Never embed `position: absolute` children that require large padding to avoid overlap.** Testimonial strips, badge rows, trust cards — put them as a *separate section below the hero*, not inside it. On mobile, absolutely positioned elements always become layout liabilities (either they overlap content or, when converted to `position: static` in a media query, they bloat the hero to 1000+ px tall).
+2. **Never use `position: static` as a mobile fallback for an element that was `position: absolute`.** If you need to show trust content on mobile, duplicate it outside the hero in a dedicated `<section>`.
+3. **Hero image columns with `minmax(520px, 1fr)`** will overflow at any mobile viewport. Use `minmax(min(100%, 520px), 1fr)` and confirm the grid collapses to 1 column at 768px.
+
+#### 5.5.3 Grid Columns — Safe Pattern
+```css
+/* WRONG — minimum 280px hard-coded causes overflow at narrow viewports */
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+
+/* CORRECT — min() clamps to 100% of container before triggering the minimum */
+grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+```
+Apply this to every grid on every site. The `min(100%, Npx)` pattern is the only safe way to use `minmax` with a pixel floor.
+
+#### 5.5.4 Overflow-X — Global Safety Net
+```css
+/* Put this in the base CSS of every site */
+html { overflow-x: clip; }   /* clips overflow without creating scroll context */
+/* Do NOT use: overflow-y: scroll; scrollbar-gutter: stable; */
+/* scrollbar-gutter: stable reserves ~15px permanently and collapses headless */
+/* browser viewports — wasting debugging time on a non-issue for real phones */
+```
+
+#### 5.5.5 Pre-Commit Mobile Overflow Check (Mandatory)
+Run this in Playwright or browser console at **375px, 390px, and 768px** after any CSS change:
+```js
+// PASS = no numbers > 0, FAIL = something is overflowing
+document.querySelectorAll('*').forEach(el => {
+  if (el.getBoundingClientRect().right > window.innerWidth + 2) {
+    console.warn('OVERFLOW:', el.tagName, el.className, Math.round(el.getBoundingClientRect().right));
+  }
+});
+console.log('scrollWidth:', document.documentElement.scrollWidth, 'innerWidth:', window.innerWidth);
+```
+**Do not commit if `scrollWidth > innerWidth`.** Fix the overflowing element first.
+
+---
+
+### 5.6 Playwright Screenshots vs. Real Phone — Why They Differ (Critical)
+
+Playwright running inside VS Code on a Mac desktop is **not** a real phone. Screenshots can appear "responsive and working" while the actual phone experience is broken. Understand why before trusting any Playwright screenshot.
+
+#### Why Playwright screenshots look narrower than expected
+- Playwright headless Chromium defaults to `deviceScaleFactor: 2` (Retina). A viewport set to `width: 390` produces a **780×1688 px PNG**, but `window.innerWidth` may report 275 px, not 390 px, because `scrollbar-gutter: stable` on `html` consumes ~15 px and the headless window has a minimum size constraint.
+- `setViewportSize()` calls do not always persist across `page.goto()` in the tool sandbox. Always re-verify `window.innerWidth` after navigation before trusting dimensional checks.
+- The tool renders in a desktop Chrome process — no iOS Safari rendering engine, no rubber-band scrolling, no `safe-area-inset` behavior.
+
+#### The #1 failure mode
+A Playwright screenshot shows the nav bar, sections, and product grid correctly proportioned. You conclude "responsive is working." Meanwhile, on a real iPhone:
+- The hero section is 1,200+ px tall because a CSS rule made an absolutely-positioned element flow statically.
+- The horizontal product grid overflows because `minmax(280px, 1fr)` can't fit two columns in 375 px.
+- The logo is 0 px wide because `flex-shrink` is not set.
+
+None of these show up in Playwright screenshots if the headless viewport is already narrower than the breakpoint being tested.
+
+#### Required practice
+1. **Always test on a real device before declaring mobile "done".** Use Safari > `certpeptides.com` directly, or use Chrome DevTools device emulation on your phone via Remote Debugging.
+2. **Use the overflow check script** (§5.5.5) — it catches issues that screenshots miss.
+3. **Set `await page.setViewportSize({ width: 390, height: 844 })` AND verify** `window.innerWidth === 390` before trusting any Playwright mobile check. If it reports a different width, the check is invalid.
+4. **Do not spend tokens analyzing Playwright screenshot dimensions.** If a screenshot looks wrong, run the JS overflow check and test on a real device. Screenshots are for quick visual confirmation of layout intent, not pixel-accurate mobile QA.
 
 ---
 
