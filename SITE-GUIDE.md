@@ -371,8 +371,20 @@ This section applies to every website build going forward. No exceptions. Perfor
   - Clean HTML (no excessive JS rendering for critical content — SSR or SSG preferred for SEO-critical pages).
   - Proper status codes (200 OK, 301/308 for redirects, 404 for missing, 410 for gone).
   - No broken links (internal or external) — monitor with Screaming Frog or Ahrefs.
+- **Indexability & Canonicals**:
+  - Every indexable page must have exactly one canonical URL, and that canonical must match the live URL, sitemap URL, Open Graph URL, and internal navigation path.
+  - Use clean, human-readable URLs for all indexable pages. Avoid parallel `.html` and non-`.html` versions of the same page.
+  - Never let a sitemap list a URL that canonicalizes to a different URL. If Google sees a conflict, the canonical wins and the sitemap entry is treated as a duplicate signal instead of a page to index.
+  - Every indexable page must be reachable from at least one internal HTML link within two clicks from the homepage.
+  - If a page is intentionally excluded from indexing, use `noindex` or a proper redirect decision explicitly; do not leave it ambiguous.
+  - After any launch or content import, inspect Search Console URL Inspection for the homepage, main landing pages, and a representative blog post or product page, then request indexing for the highest-value pages.
 - **Indexing Control**: `noindex` only on thin/duplicate/paginated/admin pages. Use `canonical` + `noindex` carefully.
 - **Structured Data & Rich Results**: Aim for multiple rich result types. Monitor in Search Console Enhancements report.
+  - Home pages should include `WebSite` and `Organization`.
+  - Product pages should include `Product`, `Offer`, and `AggregateRating` where real review data exists.
+  - Blog posts should include `Article` or `BlogPosting` plus `BreadcrumbList`.
+  - FAQ pages should include `FAQPage` only when the questions and answers are visible on the page.
+  - Every rich-result page must validate in Google's Rich Results Test before launch.
 - **International SEO** (if applicable): Proper hreflang, geo-targeting in Search Console, localized content.
 
 ### 3.4 Off-Page SEO & Authority Building
@@ -380,6 +392,16 @@ This section applies to every website build going forward. No exceptions. Perfor
 - Brand mentions (unlinked) count toward E-E-A-T.
 - Social signals (indirect): Shareable content, engagement on X/LinkedIn/Reddit.
 - Local SEO (if applicable): Google Business Profile optimized, citations consistent (NAP), reviews.
+
+#### 3.4.1 Google Business Profile + Local Trust Setup (Required When a Business Serves a Region)
+- Claim and verify the Google Business Profile for the brand before launch or immediately after relaunch.
+- Use the exact legal or trading business name consistently everywhere: site footer, schema, directory listings, and GBP.
+- Pick the closest primary category available and add secondary categories only when truly relevant.
+- Match the website contact details, business hours, service area, and phone number exactly across the site and GBP.
+- Upload logo, storefront or product photos, and at least one strong cover image so the profile looks complete and active.
+- Link the GBP website to the canonical homepage, not a duplicate or alternate URL.
+- Ask for reviews from real customers and reply to them; reviews and responses are part of local trust signals.
+- Keep NAP data consistent across Yelp, Bing Places, Apple Business Connect, Facebook, and other major citation sources.
 
 ### 3.5 Analytics, Monitoring & Iteration
 - **Google Search Console**: Verify property, submit sitemap, monitor impressions/clicks/position/Core Web Vitals/Enhancements/Issues. Fix all errors weekly.
@@ -406,6 +428,7 @@ Run this checklist for every new website and every major relaunch.
 3. **Submit sitemap in Search Console**
   - In Search Console → Sitemaps, submit the canonical sitemap URL.
   - After deploys that add major URL groups, re-check sitemap status and coverage.
+  - If the site uses a clean-URL structure, the sitemap, canonical tags, and internal links must all use that same clean-URL form.
 
 4. **Set up Google Analytics 4 (GA4)**
   - Create a GA4 property and web data stream for the canonical production domain.
@@ -424,6 +447,7 @@ Run this checklist for every new website and every major relaunch.
   - **Verify sitemap URL count** — run `grep -c "<loc>" sitemap.xml` and confirm it matches the total number of indexable pages. A mismatch means pages are missing and will not be indexed by Google.
   - Confirm GA4 Realtime receives page views from live traffic.
   - Inspect one key URL in Search Console URL Inspection and request indexing if needed.
+  - Confirm the homepage, core landing pages, and all blog or product pages are linked from the site, included in the sitemap, and not blocked by `robots.txt` or `noindex`.
 
 7. **Weekly operating cadence (mandatory)**
   - Search Console: Coverage, Enhancements, Core Web Vitals, Manual Actions, Security Issues.
