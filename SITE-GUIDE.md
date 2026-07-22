@@ -14,6 +14,110 @@ This guide is the definitive reference for all development, content, and deploym
 
 ---
 
+## 0. Mandatory Google Review System Standard (Required On Every Site From Day One)
+
+Every website must ship with a **prominent, responsive, Google-compliant review acquisition system** at launch. This is not optional. Reviews strengthen trust, improve branded search performance, support local SEO signals where applicable, increase click-through rate, and create an always-on mechanism for recurring social proof.
+
+### 0.1 Business Requirement
+- Every site must make it easy for visitors to leave a Google review without needing to search for the business manually.
+- The review system must be built into the site from day one as a standard feature, not added later as a marketing afterthought.
+- The system must maximize visibility across desktop and mobile without interfering with shopping carts, checkout, forms, or accessibility.
+- The system must be designed to increase review volume over time through constant, high-visibility exposure.
+
+### 0.2 Required Components
+Every site must include all of the following:
+- A **site-wide floating review CTA** fixed near the bottom-right corner with clear text such as `Review Us` or `Leave a Review`.
+- An **expandable review panel or modal** opened from that CTA.
+- A **direct Google review link** using the business's official Google review URL.
+- A **review QR code** inside the review panel for fast phone scanning.
+- A **prominent homepage review section** placed high on the page, not buried in the footer.
+- **Compliance-safe copy** requesting honest feedback from all customers.
+- **Click/event tracking** for review interactions.
+
+### 0.3 Required UX Pattern
+- The floating CTA must be visible on all major pages unless hidden for a specific accessibility or conversion reason.
+- Clicking the CTA must open a polished panel, sheet, or modal containing:
+  - a strong trust headline
+  - a short explanation of why reviews matter
+  - a primary button linking directly to Google Reviews
+  - the QR code
+  - a short compliance note
+- The homepage must contain a larger review-prompt block near the top of the page with:
+  - a 5-star visual cue
+  - a review CTA button
+  - the QR code or a secondary `Scan QR` action
+  - trust-oriented explanatory text
+
+### 0.4 Google Policy Compliance (Non-Negotiable)
+The system must comply with Google's review policies.
+
+Allowed:
+- Asking customers for an **honest** review.
+- Explaining that feedback helps other customers and supports the business.
+- Making the review link and QR code easy to access.
+
+Forbidden:
+- Review gating of any kind.
+- Asking only happy customers to leave public reviews.
+- Offering discounts, gifts, refunds, credits, sweepstakes entries, or any incentive in exchange for reviews.
+- Suppressing, filtering, delaying, or redirecting negative reviewers before they reach Google.
+- Misrepresenting the review destination or using fake review counts.
+
+Approved style of copy:
+- `If we earned your trust, please leave an honest Google review.`
+- `Your feedback helps other customers choose confidently.`
+- `We welcome honest feedback from all customers and do not offer incentives for reviews.`
+
+### 0.5 SEO and Traffic Standard
+- The review system must be treated as a **standard local/trust SEO component** on every website.
+- It must be easy for Google users to find strong reputation signals associated with the business.
+- The implementation must support higher review acquisition velocity, stronger branded SERP trust, and better conversion support from organic traffic.
+- Do not promise rankings or traffic in site copy, but build the system to strengthen the signals that help drive both.
+
+### 0.6 Mobile and Responsive Requirements
+- Floating CTA tap target must be at least 44px by 44px.
+- Review panel must fit fully on narrow mobile screens without horizontal scrolling.
+- QR code must scale cleanly and remain scannable on mobile and tablet.
+- Review UI must not cover key controls such as cart, checkout, chat launchers, consent banners, or sticky purchase buttons.
+- Panel/modal must close cleanly with keyboard, tap, and Escape.
+
+### 0.7 Accessibility Requirements
+- All review controls must be keyboard accessible.
+- Floating CTA must include an accessible label.
+- Review panel/modal must use proper dialog semantics when applicable.
+- Focus management must be correct when opening and closing the panel.
+- QR code image must include descriptive alt text such as `Scan to open our Google review page`.
+- Color contrast and focus states must meet the same WCAG standards as the rest of the site.
+
+### 0.8 Analytics Requirements
+Track, at minimum:
+- floating review CTA opens
+- homepage review CTA clicks
+- review-link clicks
+- QR-driven review interactions where measurable
+
+These events must be connected to the site's analytics implementation so review-system placement and copy can be improved over time.
+
+### 0.9 Required Asset Standards
+- Every site must store the Google review URL in a clear, editable config location or constant.
+- Every site must have a dedicated review QR image asset tied only to the review system.
+- Do not reuse review QR images for unrelated features.
+- Review assets must follow the same versioned-asset and cache-busting standards used elsewhere in this guide.
+
+### 0.10 Launch Gate
+No site is launch-ready unless all of the following are true:
+- a visible floating review CTA exists
+- a working Google review destination exists
+- the homepage contains a prominent review section
+- the QR code is present and functional
+- wording is compliant with Google's review rules
+- the experience is mobile-safe and accessible
+- analytics events are wired
+
+Failure on any item above blocks launch until fixed.
+
+---
+
 ## 1. WCAG 2.2 Compliance Instructions (Accessibility — Non-Negotiable)
 
 All websites **must** meet or exceed WCAG 2.2 Level AA. Aim for AAA on critical user flows. Accessibility is a core ranking factor (Google uses it in quality signals) and a legal requirement in many jurisdictions.
@@ -356,6 +460,78 @@ Platform-agnostic rules (apply to all current and future sites regardless of hos
 - Batch and optimize all API/Supabase calls; avoid blocking the main thread.
 - Test and optimize specifically for research request forms, product pages, and e-commerce flows for fast INP and conversion.
 
+### 3.3.1 Cloudflare Pages Runtime Constraint (Mandatory)
+
+Cloudflare Pages is a static runtime unless you explicitly implement Pages Functions/Workers endpoints. It does not execute PHP templates. This is a hard launch rule for all Cloudflare Pages sites.
+
+- Never deploy PHP templates (`index.php`, `contact.php`, etc.) as the only page entrypoint on Cloudflare Pages.
+- Always ship static entry files (`index.html` plus page HTML output) or use a supported static-site framework build output directory.
+- If your source uses PHP includes/templates, you must pre-render/export to static HTML before deployment.
+- Contact forms on pure Pages must use one of these patterns:
+  - external form endpoint/service (Cloudflare Forms-compatible provider, API endpoint, etc.)
+  - Pages Functions/Workers endpoint for server-side validation/mail handling
+- Clean URL policy must stay consistent across all three surfaces: internal links, canonical tags, and `sitemap.xml`.
+- Required `_redirects` mapping for extensionless routes when using static HTML files (example):
+  ```
+  /about /about.html 200
+  /services /services.html 200
+  /projects /projects.html 200
+  /contact /contact.html 200
+  ```
+- Legacy runtime URLs must 301 to canonical clean paths (example `/about.php -> /about`).
+- Pre-launch verification on Cloudflare Pages is mandatory:
+  1. Open deployed root URL and confirm HTTP 200.
+  2. Test every primary navigation route directly in address bar.
+  3. Confirm no 404s caused by missing static files or PHP-only paths.
+  4. Confirm sitemap URLs match deployed route format (clean URL vs `.html`) exactly.
+
+Launch gate: if the deployed site depends on unsupported server runtime features (such as PHP execution) and pages do not load directly on Cloudflare Pages, launch is blocked until static/edge-compatible output is deployed.
+
+### 3.3.2 Deploy path, Wrangler, Supabase, and agent tooling (Mandatory clarity)
+
+**Default production publish for static marketing sites**
+
+1. Edit static HTML/CSS/JS (and keep PHP twins consistent only when both exist).
+2. Commit and `git push` to the production branch (usually `main`).
+3. Cloudflare Pages Git integration builds and publishes (~1–3 minutes).
+4. Verify the **live custom domain** (not only local files or `*.pages.dev` if DNS lags).
+
+Agents must treat a successful push + live URL check as the normal deploy path. Do not block site work on Wrangler CLI or Cloudflare dashboard clicks when Git → Pages is connected.
+
+**When Wrangler is required**
+
+- Pages Functions / Workers (`functions/`, `wrangler.toml` / `wrangler.jsonc`)
+- Managing edge secrets, KV, D1, R2, Queues, Durable Objects
+- Direct upload / CLI deploys when Git integration is unavailable
+- Local Workers development and binding setup
+
+**When Wrangler is not required**
+
+- Pure static Cloudflare Pages sites (HTML + assets + `_headers` + `_redirects`)
+- Routine content, SEO, a11y, social-card, and CSS/JS updates
+- Supabase client usage from the browser (Supabase JS + publishable keys) without a CF Function proxy
+
+**Supabase vs Cloudflare**
+
+- Supabase is the database/auth/storage API. The browser or a backend talks to Supabase over HTTPS.
+- Cloudflare Pages hosts the static site (and optional Functions).
+- Pages Functions / Workers may *proxy* Supabase for secrets, rate limits, or caching — that is optional and uses Wrangler/bindings. Supabase alone does not require Wrangler.
+
+**Agent tooling (skills + MCP)**
+
+Official Cloudflare agent setup (verify authenticity anytime):  
+https://developers.cloudflare.com/agent-setup/prompt.md
+
+- Install Cloudflare **skills** for Workers/Pages/Wrangler guidance when the agent supports skills (`npx -y skills add cloudflare/skills --skill '*' --yes --global` or the agent-specific install in that prompt).
+- Optional Cloudflare **MCP** servers (docs, builds, bindings, observability, account API) help when debugging deploys or edge config. OAuth on first use where required. `cloudflare-docs` is public.
+- Skills/MCP do not replace SITE-GUIDE standards (a11y, SEO, security headers, social cards, Lighthouse gates).
+- Per-site `AGENTS.md` must name: GitHub remote, Cloudflare Pages project name, live canonical domain, and whether production is static-only or includes Functions.
+
+**Deploy failure notes**
+
+- A red Cloudflare Pages row with “No deployment available” after a rapid second push is often a cancelled/superseded build, not a content defect. Confirm the later production commit includes the intended files.
+- Always confirm live HTML (e.g. `curl` for `og:image` or version query strings) after deploys that change SEO or social meta.
+
 Current primary stack optimizations (Cloudflare Pages + Supabase – apply these now and whenever using this stack):
 - Use Cloudflare Image Optimization or native responsive images with transformations.
 - Leverage Cloudflare edge caching and Cache Rules aggressively for all static assets and, where safe, dynamic responses.
@@ -367,12 +543,44 @@ This section applies to every website build going forward. No exceptions. Perfor
 - **Crawlability**:
   - `robots.txt` allows all important paths, blocks admin/login.
   - XML Sitemap: **must explicitly list every indexable URL** — homepage, all product/landing/category pages, shop. Do NOT rely on auto-generation tools without verifying the output URL count matches the actual page count. A sitemap with missing pages is a silent SEO failure: Google will only index what it finds in the sitemap. After every deploy that adds new pages, update the sitemap and re-submit in Search Console.
-  - Sitemap URL count check: run `grep -c "<loc>" sitemap.xml` and verify it equals the total number of indexable pages.
+  - Sitemap URL count check: run `grep -c "<loc>" sitemap.xml` and verify it equals the total number of indexable pages. **Never include noindex pages** (cart, account, 404, auth) — doing so triggers "Submitted URL has noindex tag" Coverage errors in Search Console.
   - Clean HTML (no excessive JS rendering for critical content — SSR or SSG preferred for SEO-critical pages).
   - Proper status codes (200 OK, 301/308 for redirects, 404 for missing, 410 for gone).
   - No broken links (internal or external) — monitor with Screaming Frog or Ahrefs.
+- **HTTPS + Canonical Domain (Cloudflare)**:
+  - Every site must enforce HTTPS and a single canonical host (non-www preferred). Without this, Google sees http://, https://, www., and non-www as four separate duplicate URLs, wasting crawl budget and splitting link equity.
+  - **Cloudflare dashboard steps (do this on every new site):**
+    1. SSL/TLS → Overview → set to **Full (strict)**.
+    2. SSL/TLS → Edge Certificates → enable **Always Use HTTPS** (redirects all HTTP → HTTPS with 301).
+    3. SSL/TLS → Edge Certificates → enable **Automatic HTTPS Rewrites**.
+    4. For www→non-www: add a Redirect Rule in Cloudflare (Rules → Redirect Rules) — OR add a `_redirects` file in the site root:
+       ```
+       https://www.example.com/* https://example.com/:splat 301
+       ```
+    5. Test both `http://example.com/` and `https://www.example.com/` — both must land on `https://example.com/` in a single hop (no redirect chains).
+  - HSTS (`Strict-Transport-Security`) header must already be set in `_headers` (see Security section). This locks browsers to HTTPS after first visit.
+- **Internal Links — Canonical Form Only**:
+  - Every internal link (`href`) must use the canonical URL form. Never link to `/index.html`, `./index.html`, `http://`, or `https://www.` variants — each creates a new redirect source that Google logs in the "Pages with redirect" Coverage report.
+  - Home link must be `href="/"` not `href="index.html"`. Linking to `index.html` causes Cloudflare Pages to issue a 301 redirect to `/`, generating unnecessary redirect entries.
+  - All product/page hrefs must match the canonical path exactly (e.g. `/product-sermorelin` not `/product-sermorelin.html` if canonical is extension-less, or vice-versa — be consistent).
+  - Run `grep -rn 'href="index\.html\|href="http://\|href="https://www\.' public/*.html` before every deploy to catch regressions.
+- **Indexability & Canonicals**:
+  - Every indexable page must have exactly one canonical URL, and that canonical must match the live URL, sitemap URL, Open Graph URL, and internal navigation path.
+  - Use clean, human-readable URLs for all indexable pages. Avoid parallel `.html` and non-`.html` versions of the same page.
+  - Never let a sitemap list a URL that canonicalizes to a different URL. If Google sees a conflict, the canonical wins and the sitemap entry is treated as a duplicate signal instead of a page to index.
+  - Every indexable page must be reachable from at least one internal HTML link within two clicks from the homepage.
+  - If a page is intentionally excluded from indexing, use `noindex` or a proper redirect decision explicitly; do not leave it ambiguous.
+  - After any launch or content import, inspect Search Console URL Inspection for the homepage, main landing pages, and a representative blog post or product page, then request indexing for the highest-value pages.
 - **Indexing Control**: `noindex` only on thin/duplicate/paginated/admin pages. Use `canonical` + `noindex` carefully.
+  - Pages that must always carry `<meta name="robots" content="noindex, nofollow">`: 404 error pages, cart/basket, account/login/auth, search results, thank-you/confirmation pages, and any paginated duplicate.
+  - `noindex` pages must NOT appear in `sitemap.xml`. Google treats a submitted URL that carries `noindex` as a Coverage error ("Submitted URL has noindex tag"), which pollutes the Search Console report and wastes crawl budget. Remove them from the sitemap; the robots meta tag alone is sufficient.
+  - The robots meta tag on noindex pages should be simplified to `noindex, nofollow` — omit the extended directives (`max-image-preview`, `max-snippet`, etc.) that are only meaningful for indexable pages.
 - **Structured Data & Rich Results**: Aim for multiple rich result types. Monitor in Search Console Enhancements report.
+  - Home pages should include `WebSite` and `Organization`.
+  - Product pages should include `Product`, `Offer`, and `AggregateRating` where real review data exists.
+  - Blog posts should include `Article` or `BlogPosting` plus `BreadcrumbList`.
+  - FAQ pages should include `FAQPage` only when the questions and answers are visible on the page.
+  - Every rich-result page must validate in Google's Rich Results Test before launch.
 - **International SEO** (if applicable): Proper hreflang, geo-targeting in Search Console, localized content.
 
 ### 3.4 Off-Page SEO & Authority Building
@@ -380,6 +588,16 @@ This section applies to every website build going forward. No exceptions. Perfor
 - Brand mentions (unlinked) count toward E-E-A-T.
 - Social signals (indirect): Shareable content, engagement on X/LinkedIn/Reddit.
 - Local SEO (if applicable): Google Business Profile optimized, citations consistent (NAP), reviews.
+
+#### 3.4.1 Google Business Profile + Local Trust Setup (Required When a Business Serves a Region)
+- Claim and verify the Google Business Profile for the brand before launch or immediately after relaunch.
+- Use the exact legal or trading business name consistently everywhere: site footer, schema, directory listings, and GBP.
+- Pick the closest primary category available and add secondary categories only when truly relevant.
+- Match the website contact details, business hours, service area, and phone number exactly across the site and GBP.
+- Upload logo, storefront or product photos, and at least one strong cover image so the profile looks complete and active.
+- Link the GBP website to the canonical homepage, not a duplicate or alternate URL.
+- Ask for reviews from real customers and reply to them; reviews and responses are part of local trust signals.
+- Keep NAP data consistent across Yelp, Bing Places, Apple Business Connect, Facebook, and other major citation sources.
 
 ### 3.5 Analytics, Monitoring & Iteration
 - **Google Search Console**: Verify property, submit sitemap, monitor impressions/clicks/position/Core Web Vitals/Enhancements/Issues. Fix all errors weekly.
@@ -406,6 +624,7 @@ Run this checklist for every new website and every major relaunch.
 3. **Submit sitemap in Search Console**
   - In Search Console → Sitemaps, submit the canonical sitemap URL.
   - After deploys that add major URL groups, re-check sitemap status and coverage.
+  - If the site uses a clean-URL structure, the sitemap, canonical tags, and internal links must all use that same clean-URL form.
 
 4. **Set up Google Analytics 4 (GA4)**
   - Create a GA4 property and web data stream for the canonical production domain.
@@ -418,14 +637,25 @@ Run this checklist for every new website and every major relaunch.
   - Link GA4 to Google Ads if ads are used.
   - Confirm shared timezone/currency settings are correct before reporting periods begin.
 
-6. **Launch validation (same day)**
+6. **Cloudflare SSL/HTTPS audit (do before launch AND verify on every existing site)**
+  - These settings are **not on by default** — they must be manually checked on every site, every time. Do not assume they are correct just because the site is live.
+  - SSL/TLS → Overview → must be **Full (strict)**. Default is often "Flexible" which is insecure and causes mixed-content issues.
+  - SSL/TLS → Edge Certificates → **Always Use HTTPS** must be **ON**. Without this, `http://` URLs serve content directly instead of redirecting — Google sees them as a duplicate of the HTTPS version.
+  - SSL/TLS → Edge Certificates → **Automatic HTTPS Rewrites** must be **ON**.
+  - `_redirects` file in `public/` must contain `https://www.example.com/* https://example.com/:splat 301` for www→non-www. Without this, www variants are separate duplicate URLs in Google's index.
+  - Test: `http://example.com/` and `https://www.example.com/` must both land on `https://example.com/` in a **single hop**. Use a redirect checker tool if unsure.
+  - Do NOT enable Total TLS (requires paid ACM, not needed for single-domain sites).
+  - Do NOT configure HSTS in Cloudflare dashboard — set it via `_headers` file instead for consistency across deploys.
+
+7. **Launch validation (same day)**
   - Confirm Search Console verification is active.
   - Confirm sitemap status is `Success`.
   - **Verify sitemap URL count** — run `grep -c "<loc>" sitemap.xml` and confirm it matches the total number of indexable pages. A mismatch means pages are missing and will not be indexed by Google.
   - Confirm GA4 Realtime receives page views from live traffic.
   - Inspect one key URL in Search Console URL Inspection and request indexing if needed.
+  - Confirm the homepage, core landing pages, and all blog or product pages are linked from the site, included in the sitemap, and not blocked by `robots.txt` or `noindex`.
 
-7. **Weekly operating cadence (mandatory)**
+8. **Weekly operating cadence (mandatory)**
   - Search Console: Coverage, Enhancements, Core Web Vitals, Manual Actions, Security Issues.
   - GA4: conversion trend, landing-page performance, engagement drop-offs, anomalous traffic.
   - Fix critical errors in the same sprint; do not allow unresolved indexing or measurement drift.
@@ -434,6 +664,134 @@ Implementation notes:
 - Keep analytics scripts external to avoid CSP breakage on production static sites.
 - Use one canonical property and one canonical sitemap per production domain.
 - No SEO workflow can guarantee a permanent #1 ranking; the repeatable path is superior technical quality, strong content, authority growth, and continuous iteration.
+
+#### 3.5.2 Mandatory Indexing Automation Standard (All Sites)
+
+Manual sitemap submission and one-off URL inspection is not enough for launch reliability. Every new site must ship with automated indexing health checks and automated sitemap submission hooks.
+
+Required automation artifacts (required in every website repo):
+- `scripts/indexing-automation.sh` (or equivalent) that runs live-domain crawlability checks.
+- `.github/workflows/indexing-health.yml` (or equivalent CI pipeline) that runs on push to `main`, on manual dispatch, and daily.
+- `INDEXING-AUTOMATION.md` (or equivalent runbook) with exact setup and secret names.
+
+Minimum checks the script must perform:
+- Verify live `sitemap.xml` returns HTTP 200.
+- Verify `robots.txt` contains the canonical sitemap URL.
+- Parse all `<loc>` URLs from local sitemap and request each URL as:
+  - normal user-agent
+  - Googlebot user-agent
+- Hard-fail the run for:
+  - Googlebot 403 responses (bot-blocking / WAF challenges)
+  - 5xx responses on indexable URLs
+- Warn/fail if sitemap submission APIs return auth/permission errors.
+
+Minimum submission behavior:
+- Google Search Console API sitemap submit (when credentials are configured).
+- IndexNow submit (when key is configured).
+- If an endpoint is deprecated (for example legacy Bing sitemap ping HTTP 410), log the deprecation and continue with supported submission flow.
+
+Launch gate (non-negotiable):
+- A site is not launch-ready until indexing automation is committed, CI is active, and one successful automation run is recorded post-deploy.
+- Any unresolved Googlebot 403 or any 5xx in automation output blocks launch.
+
+#### 3.5.3 Credential Setup for Fully Automated GSC + IndexNow
+
+Use these values in each website repository's GitHub Actions secrets.
+
+Required for Google sitemap submission:
+- `GSC_SITE_URL`
+  - Domain property example: `sc-domain:example.com`
+  - URL-prefix example: `https://www.example.com/`
+
+Recommended auth method (stable automation):
+- `GSC_CLIENT_ID`
+- `GSC_CLIENT_SECRET`
+- `GSC_REFRESH_TOKEN`
+
+Optional quick/manual method (not stable for CI):
+- `GSC_ACCESS_TOKEN` (expires quickly, useful for local test runs only)
+
+Required for IndexNow (recommended):
+- `INDEXNOW_KEY`
+- `INDEXNOW_HOST` (optional if script defaults to canonical host)
+
+How to obtain each Google credential:
+
+1. Create Search Console property and ownership
+  - In Google Search Console, create a Domain property for the production root domain.
+  - Complete DNS TXT verification.
+  - Confirm the property status is Verified.
+
+2. Create Google Cloud project and enable API
+  - In Google Cloud Console, create/select a project dedicated to SEO automation.
+  - Enable `Google Search Console API`.
+
+3. Create OAuth client credentials
+  - Configure OAuth consent screen (internal or external based on account type).
+  - Create OAuth Client ID and Client Secret.
+  - Save values for `GSC_CLIENT_ID` and `GSC_CLIENT_SECRET`.
+
+4. Generate refresh token with Search Console scope
+  - Use OAuth 2.0 Playground (or equivalent) with scope:
+    - `https://www.googleapis.com/auth/webmasters`
+  - Exchange authorization code for tokens.
+  - Save `refresh_token` as `GSC_REFRESH_TOKEN`.
+  - Optional: use returned short-lived `access_token` as `GSC_ACCESS_TOKEN` for one-off local tests.
+
+5. Validate API access before enabling CI gate
+  - Run indexing automation locally with secrets set.
+  - Confirm Google sitemap submit returns success.
+  - Confirm workflow succeeds in GitHub Actions.
+
+Security rules:
+- Never commit OAuth credentials/tokens to source control.
+- Store secrets only in GitHub Actions Secrets (or equivalent secret manager).
+- Rotate client secret and refresh token immediately if exposed.
+
+Initial build requirement:
+- During initial website build, credential setup and indexing automation wiring is part of the definition of done.
+- Do not mark SEO setup complete until automation runs successfully in CI and Search Console receives the sitemap from automation.
+
+#### 3.5.4 Fast Setup Model (One-Time Work vs Per-Site Work)
+
+The indexing/auth workflow should not feel "from scratch" on every project. Use this split to keep execution fast and consistent.
+
+One-time setup (do once, reuse everywhere):
+- Create a reusable website starter template that already contains:
+  - `scripts/indexing-automation.sh`
+  - `.github/workflows/indexing-health.yml`
+  - `INDEXING-AUTOMATION.md`
+- Use the canonical one-time setup helper for any existing/new site repo (installs indexing scripts/workflows — not a CSS framework):
+  - `./scripts/apply-indexing-standard.sh /absolute/path/to/site-repo https://www.example.com`
+- Keep one documented OAuth process for generating Search Console refresh tokens.
+- Keep one documented IndexNow key-generation process.
+- Keep this section current so team members follow one process only.
+
+Per-site setup (target: 5-10 minutes):
+- Verify Search Console property for that exact domain.
+- Add repo secrets:
+  - `GSC_SITE_URL`
+  - `GSC_CLIENT_ID`
+  - `GSC_CLIENT_SECRET`
+  - `GSC_REFRESH_TOKEN`
+  - `INDEXNOW_KEY`
+- Set canonical domain values in workflow env.
+- Run workflow once manually and confirm success.
+
+Do not repeat unnecessary work per site:
+- Do not rebuild scripts/workflows from scratch.
+- Do not rely on one-off URL Inspection requests as the primary indexing method.
+- Do not skip CI-based Googlebot crawlability checks.
+
+Important expectation management:
+- No process can guarantee instant indexing or permanent rankings.
+- This standard is the fastest reliable path: publish clean URLs, submit sitemap automatically, avoid bot blocking, and continuously monitor crawl health.
+
+Definition of done for "indexing-ready" launch:
+- Workflow exists and passes on `main`.
+- Sitemap accepted in Search Console.
+- All sitemap URLs return 200 for normal user-agent and Googlebot.
+- No unresolved 403-for-bot or 5xx failures.
 
 ### 3.6 Google Ranking Factors Prioritization (2026+)
 1. **Helpful, People-First Content** (E-E-A-T + original research + user satisfaction).
@@ -543,6 +901,76 @@ grep -oE 'href="[^"]*\.(css|webp|js)\?v=[^"]*"' public/index.html | head
 ---
 
 ## 5. Development Workflow & Quality Gates
+
+### 5.0 Project Agent Instructions (`AGENTS.md`) — Mandatory for Every Site Repo
+
+Every website repository **must** include a short root file named `AGENTS.md`. This file tells AI coding agents (Grok Build, and compatible tools that load project rules) how **this specific project** is laid out and which GitHub remote owns it.
+
+`AGENTS.md` is **not** a second SITE-GUIDE. Do not paste this full guide into `AGENTS.md`.
+
+#### 5.0.1 What belongs where
+
+| Location | Purpose | Same on every site? |
+|----------|---------|---------------------|
+| This file (`SITE-GUIDE.md`) | Full build standards (a11y, security, SEO, reviews, quality gates) | Yes — synced from canonical `StephenMattison/site-guide` |
+| Root `AGENTS.md` | This repo’s remote, folder map, local quirks, finish definition | **No** — each site is different |
+| Workstation agent rules (e.g. `~/.grok/rules/`) | Cross-project habits (commit/push, communication style, SITE-GUIDE core digest) | N/A — not stored in the website repo |
+
+#### 5.0.2 Required contents of `AGENTS.md`
+
+Keep it short (roughly one screen). Must include:
+
+1. **Site name** and one-line description.
+2. **GitHub remote** for this repo only (e.g. `StephenMattison/example-website`). Agents must commit and push **only** to this remote.
+3. **Binding standards pointer:** follow root `SITE-GUIDE.md`; never edit the local SITE-GUIDE copy — edit canonical `StephenMattison/site-guide`, then run `./sync-guide.sh` (or accept a propagation PR).
+4. **Layout map:** real paths for this site (HTML/PHP pages, `assets/`, `includes/`, build output dir if any).
+5. **Implementation habits:** surgical edits; match existing patterns; version static assets when the guide requires it; finish = implemented + SITE-GUIDE-aligned for touched areas + committed + pushed.
+
+Optional: links to site-specific docs (`INDEXING-AUTOMATION.md`, deploy notes) if they exist.
+
+#### 5.0.3 Canonical template and setup
+
+**Canonical template** (in the site-guide repo):
+
+- `templates/agents/AGENTS.md`
+
+**One-time setup for a site repo** (copy template, then fill placeholders):
+
+```bash
+# From a clone of StephenMattison/site-guide:
+cp templates/agents/AGENTS.md /absolute/path/to/site-repo/AGENTS.md
+# Edit AGENTS.md: set GitHub remote, site name, and real folder paths.
+```
+
+Or use the helper when present:
+
+```bash
+./scripts/apply-agents-standard.sh /absolute/path/to/site-repo
+```
+
+The helper must **not** overwrite an existing `AGENTS.md` unless explicitly forced. Site-specific remotes and paths must not be clobbered by sync.
+
+#### 5.0.4 Sync rules (important)
+
+- **`SITE-GUIDE.md`:** auto-propagate / `./sync-guide.sh` — keep identical (or intentionally updated) across sites.
+- **`AGENTS.md`:** do **not** auto-overwrite from site-guide propagation. It is per-repo. Only seed from the template when missing.
+- When project layout or the GitHub remote changes, update that site’s `AGENTS.md` in the same PR/commit as the structural change.
+
+#### 5.0.5 Agent behavior expectations (documented for humans + AI)
+
+When working in a website repo that has `AGENTS.md` and `SITE-GUIDE.md`:
+
+- Load/respect `AGENTS.md` for remote isolation and layout.
+- Treat `SITE-GUIDE.md` as binding law for quality; open relevant sections when the task touches a11y, SEO, security, Google Reviews, performance, cache-busting, forms, or new UI.
+- Do not ask the user to re-explain standards already covered by those files.
+
+#### 5.0.6 Launch / definition of done
+
+No new site is complete until:
+
+- Root `AGENTS.md` exists and names the correct GitHub remote and layout.
+- Root `SITE-GUIDE.md` exists and is synced from canonical site-guide.
+- `./sync-guide.sh` exists (or the site is on the propagation list and receives guide updates).
 
 ### 5.1 Lighthouse CI (Mandatory for Every Repo)
 
@@ -786,6 +1214,109 @@ Operator sequence per repo:
 3. `siteaudit`
 4. `sitepush "what changed"`
 
+### 5.3.3 Recent SEO + Merchant Execution Standard (July 2026)
+Use this exact runbook for static marketing/ecommerce sites to prevent partial indexing, canonical drift, and feed setup mistakes.
+
+#### 5.3.3.1 Canonical/URL Alignment (Launch Gate)
+- Pick one URL format (clean URLs or `.html`) and use it consistently in all of these places:
+  - `<link rel="canonical">`
+  - `og:url`
+  - sitemap `<loc>` entries
+  - internal navigation links
+- Never mix clean URLs in the sitemap with `.html` canonicals. Google treats this as duplicate/conflicting intent and may index fewer pages.
+- Every indexable page must ship with exactly one canonical URL and one matching `og:url`.
+
+#### 5.3.3.2 Sitemap Coverage + Freshness
+- Ensure sitemap includes every indexable page (home, core pages, shop/collection pages, blog index, all blog posts).
+- Validate count before deploy:
+  - `grep -c "<loc>" sitemap.xml`
+- Refresh all `lastmod` values whenever URLs/content are updated and re-submit sitemap in Search Console.
+- Keep `robots.txt` pointing to the exact live sitemap URL.
+
+#### 5.3.3.3 Structured Data Minimums (Static Sites)
+- Homepage: `WebSite`, `Organization`, `FAQPage` where visible FAQ content exists.
+- Shop/collection pages: `CollectionPage` and/or `ItemList`, plus `BreadcrumbList`.
+- Product-focused sections: include product objects with price/currency/availability from real page data.
+- Blog index: `CollectionPage` + `ItemList`.
+- Blog posts: `BlogPosting` + `BreadcrumbList`.
+- If schema references fragment IDs (for example `#product-id`), those IDs must exist in the HTML.
+
+#### 5.3.3.4 Internal Links for Discovery
+- Homepage must link to high-value secondary pages (FAQ, learning hub/blog, and core commercial pages).
+- Blog index must link to all posts.
+- Important revenue pages must be reachable in 1-2 clicks from top-level navigation or homepage sections.
+
+#### 5.3.3.5 GA4 Coverage Rule
+- GA4 loader must run on all indexable pages, including blog pages.
+- Do not add path-based exclusions (for example `/blog`) unless there is a legal/compliance reason and a documented exception.
+- Verify events are received on both primary marketing pages and at least one blog post URL.
+
+#### 5.3.3.6 Search Console Operator Procedure
+1. Submit sitemap.
+2. Inspect key URLs (home, shop, one blog post, contact/about).
+3. Request indexing for highest-value URLs first.
+4. If request quota is hit, continue the next day until all target URLs are requested.
+5. Re-check Page indexing and Enhancements weekly until stable.
+
+#### 5.3.3.7 Merchant Center Feed Standard (Single-Country Starter)
+- Keep one site-specific feed CSV per site repo, named:
+  - `<site>-merchant-center-products.csv`
+- Required starter columns:
+  - `id,title,description,link,image_link,availability,price,condition,brand,identifier_exists,product_type,google_product_category`
+- Price format must be `number currency` (example `24.95 USD`).
+- If GTIN/MPN/brand identifiers are not available, set `identifier_exists` to `no`.
+- Product links and images must be live, crawlable HTTPS URLs on the canonical domain.
+- Configure shipping/tax in Merchant Center account settings unless you intentionally manage those attributes in the feed.
+
+#### 5.3.3.7.1 Merchant Policy Parity Rule (Launch Gate)
+- Merchant Center shipping/returns settings must exactly match the public website policy pages and structured data.
+- If Merchant Center says any of the following, the website must say the same thing in plain language:
+  - accepted returns for defective/non-defective products
+  - exchanges accepted or not accepted
+  - product condition eligible for return
+  - return window in days
+  - return method (`by mail` when applicable)
+  - return label responsibility
+  - restocking fee policy
+  - refund processing time
+- Product structured data must also align with the live policy:
+  - `merchantReturnDays`
+  - `returnMethod`
+  - `returnFees`
+  - `refundType`
+- Do not publish `FreeReturn` schema if customers pay return shipping. Use the schema value that matches the actual policy.
+
+#### 5.3.3.7.2 Recommended Starter Settings for Simple USPS Operations
+- For low-overhead U.S.-only launches, standardize on:
+  - USPS Standard Shipping
+  - USPS Expedited Shipping
+  - free USPS standard shipping threshold configured in both site UI and checkout logic
+- Avoid adding UPS/FedEx/overnight variants unless they are truly offered in checkout.
+- Keep shipping copy, checkout labels, and Merchant Center shipping settings identical.
+
+#### 5.3.3.7.3 Merchant Review + Propagation Expectations
+- New products commonly show `Under review` for 24-72 hours after feed creation or policy changes.
+- `Store quality: No score / Missing information` is normal immediately after setup when products are still under review, policy data is fresh, or impressions are insufficient.
+- Do not create duplicate campaigns during this propagation window just because Merchant Center prompts for one.
+- If an Ads campaign already exists, fund and unpause the existing campaign instead of creating a duplicate unless there is a deliberate segmentation reason.
+
+#### 5.3.3.7.4 Merchant Post-Setup Checklist
+1. Confirm product feed file exists in the repo with site-specific naming.
+2. Confirm policy URL is live and includes the same returns/shipping facts entered in Merchant Center.
+3. Confirm product status moves from `Under review` to approved or at least not disapproved.
+4. Check `Notifications`, product diagnostics, and store quality after 24-72 hours.
+5. If `No score` persists past about 5-7 days, inspect missing policy data, crawl issues, or lack of impressions.
+6. Only then resume campaign launch or unpause decisions.
+
+#### 5.3.3.8 Canonical Guide Update Workflow (Mandatory)
+When updating `SITE-GUIDE.md` for new standards:
+1. Edit the canonical guide repo first.
+2. Commit and push canonical repo changes.
+3. In each site repo, run `./sync-guide.sh`.
+4. Commit and push the synced guide copy in that site repo.
+
+Never treat a website repo copy as the source of truth.
+
 ### 5.4 Playwright Rapid Validation Protocol (Mandatory for Fast Web QA)
 - Use browser automation (Playwright) as the default first-pass validator after UI edits, bug fixes, and production regressions.
 - Goal: reduce manual QA time, catch breakage early, and verify behavior consistently across flows.
@@ -987,6 +1518,6 @@ Playwright is the first-pass QA tool; real-device testing is the required final 
 
 **Final Mandate**: Every line of code, every piece of content, every configuration must contribute to **WCAG perfection**, **military-grade security**, and **unbeatable SEO**. No compromises. Sites built to this standard will rank #1, convert at industry-leading rates, and serve every user equitably while withstanding sophisticated attacks.
 
-**Version**: 2026.04 | **Last Reviewed**: April 28, 2026 (test #5) | **Next Review**: Quarterly or after major Google/Core updates.
+**Version**: 2026.07 | **Last Reviewed**: July 21, 2026 (AGENTS.md standard) | **Next Review**: Quarterly or after major Google/Core updates.
 
 *This guide is living — update immediately when Google, W3C, or security standards evolve.*
