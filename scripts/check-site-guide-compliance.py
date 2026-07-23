@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""SITE-GUIDE compliance checks for static HTML pages.
+"""SITE-GUIDE compliance checks for static HTML pages + agent discovery.
 
 Current enforced rules:
 - Every indexable HTML page has a non-empty <title>.
 - Every indexable HTML page has a non-empty meta description.
 - Titles are unique across indexable pages.
 - Meta descriptions are unique across indexable pages.
+- Root llms.txt exists, has a Markdown H1 (# …), and at least one Markdown link.
 
 Indexable means the page does not contain a robots meta tag with noindex.
 """
@@ -123,6 +124,46 @@ def parse_page(path: Path) -> PageMeta:
     return parser.page
 
 
+def check_llms_txt(root: Path) -> list[str]:
+    """SITE-GUIDE §5.3.3.2a — root llms.txt for agentic browsing."""
+    path = root / "llms.txt"
+    errors: list[str] = []
+    if not path.is_file():
+        return [
+            "llms.txt: missing at site root (mandatory for agentic browsing / AI discovery; "
+            "see SITE-GUIDE §5.3.3.2a)"
+        ]
+
+    text = path.read_text(encoding="utf-8", errors="ignore").lstrip("\ufeff")
+    stripped = text.lstrip()
+    if stripped.lower().startswith("<!doctype") or stripped.lower().startswith("<html"):
+        errors.append(
+            "llms.txt: file looks like HTML, not Markdown plain text "
+            "(live soft-404 often means the file was never deployed)"
+        )
+
+    has_h1 = bool(re.search(r"(?m)^#\s+\S+", text))
+    if not has_h1:
+        errors.append(
+            'llms.txt: missing required Markdown H1 (first line should be "# Site Name")'
+        )
+
+    has_md_link = bool(re.search(r"\[[^\]]+\]\((?:https?:\/\/|mailto:|tel:)[^)]+\)", text))
+    if not has_md_link:
+        errors.append(
+            "llms.txt: missing Markdown links — use [Label](https://example.com/) "
+            "(bare URLs alone fail agentic 'contains links' checks)"
+        )
+
+    has_summary = bool(re.search(r"(?m)^>\s+\S+", text))
+    if not has_summary:
+        errors.append(
+            "llms.txt: missing blockquote summary line (e.g. \"> One sentence about the business\")"
+        )
+
+    return errors
+
+
 def main() -> int:
     root = Path(os.getcwd())
     html_files = collect_html_files(root)
@@ -132,6 +173,7 @@ def main() -> int:
         return 0
 
     errors: list[str] = []
+    errors.extend(check_llms_txt(root))
     titles: dict[str, list[str]] = {}
     descriptions: dict[str, list[str]] = {}
 
@@ -175,7 +217,10 @@ def main() -> int:
         return 1
 
     print("SITE-GUIDE compliance check passed.")
-    print("Checked indexable HTML pages for title/meta-description presence and uniqueness.")
+    print(
+        "Checked llms.txt (H1 + Markdown links + summary) and indexable HTML "
+        "title/meta-description presence and uniqueness."
+    )
     return 0
 
 
