@@ -593,7 +593,7 @@ p  { margin-bottom: 1rem; }
 }
 .footer ul a:hover { color: var(--secondary-light); }
 .footer-bottom {
-  max-width: var(--container); margin: 3rem auto 0;
+  max-width: var(--container); margin: 1.5rem auto 0;
   padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,.1);
   display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   font-size: .8125rem; color: rgba(255,255,255,.6);
