@@ -1,23 +1,22 @@
 /**
  * POST /api/subscribe — Busy Bee Hive newsletter
  *
- * Stores + routes signups so you can run drip campaigns.
- *
+ * Primary ESP: Klaviyo (same pattern as Revenge Works).
  * Cloudflare Pages → Settings → Environment variables (Production):
- *   MAILERLITE_API_KEY     (recommended for lists + automations/drips)
- *   MAILERLITE_GROUP_ID    (optional group/list id)
- *   RESEND_API_KEY         (optional: admin notify + confirmation email)
- *   NEWSLETTER_NOTIFY_TO   (optional: your inbox, e.g. stephen@…)
- *   NEWSLETTER_FROM        (optional: verified Resend from, e.g. Hive <hello@cooncatcentral.com>)
+ *   KLAVIYO_API_KEY   Private API key (pk_…)
+ *   KLAVIYO_LIST_ID   List ID for Busy Bee Hive (e.g. Xyz123)
  *
- * Optional KV binding (Functions → Bindings):
- *   Variable name: NEWSLETTER  →  a KV namespace
- *   Keys: Busy_Bee_Hive:{email}  →  JSON subscriber record
+ * Optional:
+ *   NEWSLETTER         KV binding — backup store + rate limit
+ *   RESEND_API_KEY / NEWSLETTER_NOTIFY_TO / NEWSLETTER_FROM — email you on signup
+ *   NEWSLETTER_SEND_WELCOME=1 — optional Resend welcome (Klaviyo Flow is better)
  *
- * Full setup: NEWSLETTER-SETUP.md in repo root.
+ * Full setup: NEWSLETTER-SETUP.md
  */
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Klaviyo API revision used on Revenge Works (stable for subscription bulk create)
+const KLAVIYO_REVISION = '2023-12-15';
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -29,36 +28,64 @@ function json(body, status = 200) {
   });
 }
 
-async function addMailerLite(env, email, fields) {
-  if (!env.MAILERLITE_API_KEY) return { skipped: true };
-  const payload = {
-    email,
-    status: 'active',
-    fields: {
-      source: fields.source || 'website',
-      path: fields.path || '',
-      brand: 'Busy Bee Maine Coons',
-    },
-  };
-  if (env.MAILERLITE_GROUP_ID) {
-    payload.groups = [env.MAILERLITE_GROUP_ID];
-  }
-  const res = await fetch('https://connect.mailerlite.com/api/subscribers', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `Bearer ${env.MAILERLITE_API_KEY}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  // 200/201 created/updated, 409 often already exists
-  if (res.ok || res.status === 409) {
+async function addKlaviyo(env, email, fields) {
+  const apiKey = env.KLAVIYO_API_KEY;
+  const listId = env.KLAVIYO_LIST_ID;
+  if (!apiKey || !listId) return { skipped: true };
+
+  const res = await fetch(
+    'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: 'Klaviyo-API-Key ' + apiKey,
+        'Content-Type': 'application/json',
+        revision: KLAVIYO_REVISION,
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'profile-subscription-bulk-create-job',
+          attributes: {
+            custom_source: 'Busy Bee Hive website',
+            profiles: {
+              data: [
+                {
+                  type: 'profile',
+                  attributes: {
+                    email,
+                    properties: {
+                      signup_source: fields.source || 'website',
+                      signup_path: fields.path || '',
+                      brand: 'Busy Bee Maine Coons',
+                      site: 'cooncatcentral.com',
+                    },
+                    subscriptions: {
+                      email: {
+                        marketing: {
+                          consent: 'SUBSCRIBED',
+                          consented_at: new Date().toISOString(),
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          relationships: {
+            list: { data: { type: 'list', id: listId } },
+          },
+        },
+      }),
+    }
+  );
+
+  if (res.ok || res.status === 202 || res.status === 409) {
     return { ok: true, status: res.status };
   }
   const text = await res.text();
-  console.error('[subscribe] MailerLite error', res.status, text.slice(0, 400));
-  return { ok: false, status: res.status, body: text.slice(0, 200) };
+  console.error('[subscribe] Klaviyo error', res.status, text.slice(0, 500));
+  return { ok: false, status: res.status, body: text.slice(0, 300) };
 }
 
 async function notifyAdmin(env, email, fields) {
@@ -75,7 +102,7 @@ async function notifyAdmin(env, email, fields) {
       to: [env.NEWSLETTER_NOTIFY_TO],
       subject: `Hive signup: ${email}`,
       text: [
-        `New Busy Bee Hive subscriber`,
+        'New Busy Bee Hive subscriber',
         `Email: ${email}`,
         `Source: ${fields.source || 'unknown'}`,
         `Path: ${fields.path || ''}`,
@@ -83,37 +110,6 @@ async function notifyAdmin(env, email, fields) {
       ].join('\n'),
     }),
   }).catch((err) => console.error('[subscribe] notify failed', err));
-}
-
-async function sendWelcome(env, email) {
-  if (!env.RESEND_API_KEY || env.NEWSLETTER_SEND_WELCOME !== '1') return;
-  const from = env.NEWSLETTER_FROM || 'Busy Bee Hive <onboarding@resend.dev>';
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [email],
-      subject: 'Welcome to the Busy Bee Hive 🐝',
-      text: [
-        'Welcome to the Busy Bee Hive!',
-        '',
-        'You’re on the list for:',
-        '• First look at new Maine Coon litters (before public posts)',
-        '• Practical care tips for giant-breed cats',
-        '• A welcome offer on oversized gear in our shop',
-        '',
-        'Browse available kittens: https://cooncatcentral.com/kittens',
-        'Care guides: https://cooncatcentral.com/care',
-        '',
-        'You can unsubscribe anytime from future emails.',
-        '— Busy Bee Maine Coons',
-      ].join('\n'),
-    }),
-  }).catch((err) => console.error('[subscribe] welcome failed', err));
 }
 
 export async function onRequestPost({ request, env }) {
@@ -145,7 +141,6 @@ export async function onRequestPost({ request, env }) {
     ua,
   };
 
-  // Optional KV store (exportable backup + rate limit)
   if (env.NEWSLETTER) {
     try {
       const rateKey = `ratelimit:${ip}`;
@@ -169,10 +164,11 @@ export async function onRequestPost({ request, env }) {
     console.log('[subscribe]', JSON.stringify(record));
   }
 
-  // Primary ESP for drips / campaigns
-  const ml = await addMailerLite(env, email, { source, path });
-  if (ml && ml.ok === false && env.MAILERLITE_API_KEY) {
-    // Still accept signup locally; surface soft error only if nothing else stored
+  const klaviyo = await addKlaviyo(env, email, { source, path });
+  if (klaviyo.skipped) {
+    console.warn('[subscribe] KLAVIYO_API_KEY or KLAVIYO_LIST_ID not set');
+  } else if (klaviyo.ok === false) {
+    // Still succeed if KV stored; otherwise fail so visitor can retry
     if (!env.NEWSLETTER) {
       return json({
         ok: false,
@@ -181,16 +177,10 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
-  // Fire-and-forget admin + optional welcome
-  const side = Promise.all([
-    notifyAdmin(env, email, { source, path }),
-    sendWelcome(env, email),
-  ]);
-  // Workers may cut off after response; await briefly
   try {
     await Promise.race([
-      side,
-      new Promise((r) => setTimeout(r, 2500)),
+      notifyAdmin(env, email, { source, path }),
+      new Promise((r) => setTimeout(r, 2000)),
     ]);
   } catch { /* ignore */ }
 

@@ -46,9 +46,9 @@ You are working in **one** website repo. Push only to this remote.
 
 - **UI:** footer Hive strip + **exit-intent popup** (`newsletter.js`)
 - **API:** `public/functions/api/subscribe.js` → `POST /api/subscribe`
-- **ESP:** MailerLite (lists + drips) via env `MAILERLITE_API_KEY` / `MAILERLITE_GROUP_ID`
-- **Optional:** KV binding `NEWSLETTER`; Resend notify/welcome (`RESEND_API_KEY`, `NEWSLETTER_NOTIFY_TO`, …)
-- Full wire-up steps: **`NEWSLETTER-SETUP.md`**
+- **ESP:** **Klaviyo** (same pattern as Revenge Works) via `KLAVIYO_API_KEY` + `KLAVIYO_LIST_ID`
+- **Optional:** KV binding `NEWSLETTER`; Resend notify (`RESEND_API_KEY`, `NEWSLETTER_NOTIFY_TO`)
+- Full wire-up: **`NEWSLETTER-SETUP.md`**
 
 ## Implementation habits
 
