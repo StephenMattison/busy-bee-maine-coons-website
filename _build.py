@@ -23,7 +23,7 @@ SITE = "https://cooncatcentral.com"
 BRAND = "Busy Bee Maine Coons"
 TAGLINE = "Where Gentle Giants Find Their Forever Homes"
 YEAR = datetime.datetime.now(datetime.UTC).year
-ASSET_V = "20260804d"
+ASSET_V = "20260804e"
 # Official Google review destination (update when Place ID is confirmed)
 GOOGLE_REVIEW_URL = "https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews"
 GOOGLE_REVIEW_QR = f"/images/review/google-review-qr.png?v={ASSET_V}"
