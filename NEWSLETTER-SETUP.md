@@ -1,90 +1,82 @@
-# Busy Bee Hive — newsletter (Klaviyo)
+# Busy Bee Hive — newsletter setup (Klaviyo)
 
-## Short answer
+**Status as of last code deploy:** Site UI + API are ready.  
+**Still needs you (when you have 10 minutes):** create a Klaviyo list + paste 2 secrets into Cloudflare.
 
-**Yes — Klaviyo is the right tool for this.**  
-You already use it on **Revenge Works** (`KLAVIYO_API_KEY` + `KLAVIYO_LIST_ID` on that Pages project). Busy Bee’s subscribe API is now wired the same way.
-
-**I could not find your Klaviyo private key or list IDs in this repo** (they should live only in Cloudflare env / Klaviyo dashboard — good). You paste them into the Busy Bee Pages project once.
+You can skip this for now. Signups still work on the site; without the Klaviyo keys they only hit Cloudflare Function logs until you connect the account.
 
 ---
 
-## What the site does
+## Already done (no action)
 
-1. Footer **Hive** signup + **exit-intent** popup  
-2. `POST /api/subscribe` (Cloudflare Pages Function)  
-3. Creates/updates a **Klaviyo profile**, marks **email marketing consented**, adds them to your **list**
-
----
-
-## Cloudflare env vars (Busy Bee project)
-
-Pages → **`busy-bee-maine-coons-website`** (or your exact project) → **Settings → Environment variables** (Production):
-
-| Variable | Value |
-|----------|--------|
-| `KLAVIYO_API_KEY` | Private API key from Klaviyo (starts with `pk_`) |
-| `KLAVIYO_LIST_ID` | List ID for a list e.g. **Busy Bee Hive** |
-
-Optional:
-
-| Variable | Purpose |
-|----------|---------|
-| KV binding `NEWSLETTER` | Backup store + rate limit |
-| `RESEND_API_KEY` + `NEWSLETTER_NOTIFY_TO` | Email *you* on each signup |
-| `NEWSLETTER_FROM` | Verified Resend from-address |
-
-Redeploy after saving env vars (or push any commit).
+- Footer **Hive** signup strip (benefits + form)
+- **Exit-intent** popup (“Before you go…”)
+- `POST /api/subscribe` on Cloudflare Pages
+- Code pushes profiles to **Klaviyo** when env vars exist (same pattern as Revenge Works)
 
 ---
 
-## Where to get keys in Klaviyo
+## When you have time (checklist)
 
-1. **API key**  
-   Klaviyo → **Settings → API keys** → Create **Private** API key  
-   Scopes needed (minimum): profiles write, lists write, subscriptions write (or a full private key while testing)
+### 1. Klaviyo.com (~3 min)
 
-2. **List ID**  
-   **Audience → Lists & segments** → create list **Busy Bee Hive** (or use an existing list)  
-   Open the list → **Settings** (or URL) → copy **List ID** (short alphanumeric)
+1. Log in at [klaviyo.com](https://www.klaviyo.com)
+2. **Audience → Lists & segments → Create list**  
+   Name: **Busy Bee Hive** (keep it separate from Revenge Works)
+3. Open that list → copy the **List ID** (short code in settings/URL)
+4. **Settings → API keys → Create Private API key**  
+   Or reuse your existing account private key (`pk_…`) if it already has list/profile permissions
 
-You can reuse the **same private API key** as Revenge Works if that key is account-wide; use a **separate list** for Busy Bee so drips stay clean.
+### 2. Cloudflare (~3 min)
 
----
+1. [Cloudflare Dashboard](https://dash.cloudflare.com) → **Workers & Pages**
+2. Open the Busy Bee project (`busy-bee-maine-coons-website` / cooncatcentral)
+3. **Settings → Environment variables** → Production → **Add**:
 
-## Where you access contacts + drips
+| Name | Value |
+|------|--------|
+| `KLAVIYO_API_KEY` | your private key (`pk_…`) |
+| `KLAVIYO_LIST_ID` | Busy Bee Hive list ID |
 
-| Need | In Klaviyo |
-|------|------------|
-| See everyone | **Audience → Profiles** or your list |
-| Export | List → **Manage list → Export** |
-| Drip / welcome series | **Flows** → trigger = **Added to list** (Busy Bee Hive) or **Subscribed to email marketing** |
-| Campaigns | **Campaigns** → send to that list |
+4. Save, then **Deployments → Retry deployment** (or any git push) so Functions see the new vars
 
-Recommended first flow: **Welcome / Hive** — Day 0 welcome, Day 2 care guide link, Day 5 litter-alert pitch, Day 10 shop gear.
+### 3. Quick test (~2 min)
 
----
-
-## Test checklist
-
-1. Set env vars + redeploy  
-2. Sign up on https://cooncatcentral.com with a real email  
-3. Klaviyo → Profiles → find email, confirm list membership + email marketing = subscribed  
-4. Exit-intent once per session (mouse out top of page)
+1. Open https://cooncatcentral.com/
+2. Join the Hive with a real email you control
+3. In Klaviyo → **Audience → Profiles** (or the list) → confirm the email appears
+4. Optional: **Flows** → new flow triggered when someone is **added to list “Busy Bee Hive”** (welcome drip later)
 
 ---
 
-## Architecture
+## Where emails live once connected
+
+| Want | Where |
+|------|--------|
+| All Hive emails | Klaviyo → list **Busy Bee Hive** / Profiles |
+| Export CSV | List → export |
+| Drip / welcome series | Klaviyo → **Flows** |
+| One-off blasts | Klaviyo → **Campaigns** |
+
+---
+
+## Optional later (not required)
+
+| Extra | Why |
+|-------|-----|
+| Cloudflare KV binding named `NEWSLETTER` | Backup store + rate limit |
+| Resend `RESEND_API_KEY` + `NEWSLETTER_NOTIFY_TO` | Email *you* on each signup |
+
+Drips are better as **Klaviyo Flows** than Resend one-offs.
+
+---
+
+## Architecture (for later)
 
 ```
 Site form / exit popup
-        │
-        ▼
-POST /api/subscribe  (Pages Function)
-        │
-        ├──► Klaviyo list + profile (drips/flows live here)
-        ├──► KV NEWSLETTER (optional backup)
-        └──► Resend notify (optional)
+        →  POST /api/subscribe  (Pages Function)
+        →  Klaviyo list “Busy Bee Hive”  ← you work here
 ```
 
-**MailerLite is not required** if you stay on Klaviyo.
+**Bottom line:** Nothing critical is blocked. When you’re free, do the Klaviyo list + 2 Cloudflare env vars above and the Hive is fully live.
