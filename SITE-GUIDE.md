@@ -930,6 +930,61 @@ grep -oE 'href="[^"]*\.(css|webp|js)\?v=[^"]*"' public/index.html | head
 
 **Common pitfall**: When a template uses a plain triple-quoted string (not an f-string), `{asset_v(...)}` will be emitted as literal text and break the URL. Always either (a) make the template an f-string, or (b) use string concatenation as shown above. The verification grep above catches this.
 
+### 4.2 Vertical Spacing Density (Mandatory UX Standard)
+
+**Owner preference (binding):** Sections must feel **compact and scannable** — not sparse. Excessive top/bottom padding forces unnecessary scrolling, lowers engagement, and makes short pages feel empty. Agents and builders must default to the density below on **every new site and every layout pass**.
+
+**Anti-pattern (forbidden as a default):**
+- Content-section vertical padding of `4rem`–`6rem`+ (or `py-16` / `py-20` / `py-24` utility stacks) for ordinary marketing sections
+- Subtitle blocks with `margin-bottom: 3rem` or more before the first card grid
+- Hero bands with huge empty padding that do not clear real overlays
+- “Airy SaaS” spacing copied from templates without measuring scroll cost
+
+**Target density (reference implementation — treat as the approved look):**
+
+| Region | Vertical padding / spacing | Notes |
+|--------|----------------------------|--------|
+| Content sections (`.section` or equivalent) | **`2rem` top + bottom** (≈32px), horizontal `1.25rem` | Default for Featured, Why, Stories, Shop grids, etc. |
+| Section title → subtitle | Title `margin-bottom` **~0.4rem**; subtitle **`margin: 0 auto 1.25rem`** | Do not leave a large empty gap before cards |
+| Hero (desktop) | **~`2.5rem`–`2.75rem`** vertical | Enough presence; not a half-viewport empty band |
+| Hero (mobile, ≤~880px) | **~`1.75rem`–`2rem`** vertical | Keep CTAs near the fold |
+| Inner page header (`.page-header`) | **~`1.75rem`–`1.5rem`** vertical | Not a second hero |
+| Trust strip | **~`0.85rem`** vertical | Compact single row |
+| CTA banner | **~`2rem`** vertical | Strong but short |
+| Newsletter / mid-page signup | **~`1.75rem`** vertical | |
+| Homepage review strip (§0) | **~`0.85rem`** vertical | Short strip, not a full marketing section |
+| Card / feature / testimonial grids | Gap **~`1rem`–`1.15rem`**; card padding **~`1.15rem`–`1.25rem`** | Prefer tighter grids over huge cell padding |
+| Inline “callout” boxes inside pages | Padding **~`1.25rem`**; outer top margin **~`1.25rem`** | Avoid `margin-top: 3rem` + `padding: 2.5rem` defaults |
+
+**CSS shape (copy/adapt; class names may differ per site):**
+
+```css
+/* Default content sections — do NOT use 4.5rem+ */
+.section { padding: 2rem 1.25rem; }
+.section-title { margin-bottom: 0.4rem; }
+.section-subtitle { margin: 0 auto 1.25rem; /* not 3rem */ }
+
+.hero { padding: 2.5rem 1.25rem 2.75rem; }
+@media (max-width: 880px) {
+  .hero { padding: 1.75rem 1.25rem 2rem; }
+}
+
+.page-header { padding: 1.75rem 1.25rem 1.5rem; }
+.trust-strip { padding: 0.85rem 1.25rem; }
+.cta-banner { padding: 2rem 1.25rem; }
+.nl-section { padding: 1.75rem 1.25rem; }
+```
+
+**Rules for agents:**
+1. On **new sites**, implement this density from day one — do not ship “fix later” with oversized section padding.
+2. On **existing sites**, when editing layout/CSS or regenerating chrome, **audit and tighten** sections that still use ~4rem+ vertical padding unless the user explicitly asks for more air.
+3. **Utility frameworks (Tailwind, etc.):** prefer section wrappers around `py-8` (2rem) class scale, not `py-16`/`py-20`/`py-24`, for standard content blocks.
+4. **Still allow** slightly larger spacing only for rare full-bleed moments (e.g. legal long-form reading comfort is content line-height, not giant section chrome) — never as the global section default.
+5. **Review strips and trust rows** stay especially tight so primary content (kittens, products, services) stays high on the page.
+6. When in doubt: open a reference site that already matches this guide (e.g. Busy Bee / cooncatcentral.com section rhythm) and match its vertical rhythm rather than inventing larger gaps.
+
+**Launch / layout gate:** Homepage and primary landing pages must not require excessive scroll between adjacent section headings solely because of padding. If two section titles are separated mostly by empty cream/white space, reduce padding to the targets above.
+
 ---
 
 ## 5. Development Workflow & Quality Gates
@@ -1648,19 +1703,20 @@ These patterns are derived from working production sites (revengeworks.com et al
 #### 5.5.2 Hero Section — Mobile Rules
 ```css
 .hero {
-  /* Desktop: extra bottom padding to clear absolutely-positioned overlays */
-  padding: 3.5rem 1.5rem 8rem;
+  /* Compact density — see §4.2. Do not add multi-rem empty padding to clear overlays. */
+  padding: 2.5rem 1.25rem 2.75rem;
   position: relative; overflow: hidden;
 }
 @media (max-width: 768px) {
-  .hero { padding: 2.5rem 1.25rem 3rem; }
+  .hero { padding: 1.75rem 1.25rem 2rem; }
 }
 ```
 
 **Hard rules:**
-1. **Never embed `position: absolute` children that require large padding to avoid overlap.** Testimonial strips, badge rows, trust cards — put them as a *separate section below the hero*, not inside it. On mobile, absolutely positioned elements always become layout liabilities (either they overlap content or, when converted to `position: static` in a media query, they bloat the hero to 1000+ px tall).
+1. **Never embed `position: absolute` children that require large padding to avoid overlap.** Testimonial strips, badge rows, trust cards — put them as a *separate section below the hero*, not inside it. On mobile, absolutely positioned elements always become layout liabilities (either they overlap content or, when converted to `position: static` in a media query, they bloat the hero to 1000+ px tall). **Do not “solve” overlay clearance with 6–8rem bottom padding** — that violates §4.2.
 2. **Never use `position: static` as a mobile fallback for an element that was `position: absolute`.** If you need to show trust content on mobile, duplicate it outside the hero in a dedicated `<section>`.
 3. **Hero image columns with `minmax(520px, 1fr)`** will overflow at any mobile viewport. Use `minmax(min(100%, 520px), 1fr)` and confirm the grid collapses to 1 column at 768px.
+4. Hero vertical padding follows **§4.2 Vertical Spacing Density** (compact, scannable).
 
 #### 5.5.3 Grid Columns — Safe Pattern
 ```css
