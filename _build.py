@@ -23,7 +23,7 @@ SITE = "https://cooncatcentral.com"
 BRAND = "Busy Bee Maine Coons"
 TAGLINE = "Where Gentle Giants Find Their Forever Homes"
 YEAR = datetime.datetime.now(datetime.UTC).year
-ASSET_V = "20260803c"
+ASSET_V = "20260804"
 # Official Google review destination (update when Place ID is confirmed)
 GOOGLE_REVIEW_URL = "https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews"
 GOOGLE_REVIEW_QR = f"/images/review/google-review-qr.png?v={ASSET_V}"
@@ -247,7 +247,18 @@ def footer():
 """
 
 def page(current: str, title: str, description: str, body_html: str,
-         schema: list | None = None, og_type: str = "website") -> str:
+         schema: list | None = None, og_type: str = "website",
+         extra_scripts: list[str] | None = None) -> str:
+    foot = footer()
+    if extra_scripts:
+        tags = "\n".join(
+            f'  <script src="{src}?v={ASSET_V}" defer></script>'
+            for src in extra_scripts
+        )
+        foot = foot.replace(
+            f'<script src="/js/newsletter.js?v={ASSET_V}" defer></script>',
+            f'<script src="/js/newsletter.js?v={ASSET_V}" defer></script>\n{tags}',
+        )
     return (
         head(title, description, current, og_type, schema)
         + announcement()
@@ -255,8 +266,13 @@ def page(current: str, title: str, description: str, body_html: str,
         + '  <main id="main">\n'
         + body_html
         + '  </main>\n'
-        + footer()
+        + foot
     )
+
+def load_hub(name: str) -> str:
+    """Load prebuilt hub HTML from _hubs/ (care, stories, tools)."""
+    path = ROOT / "_hubs" / f"{name}_inner.html"
+    return path.read_text(encoding="utf-8")
 
 def newsletter_section() -> str:
     return """  <section class="nl-section" id="newsletter" aria-label="Newsletter signup">
@@ -418,26 +434,26 @@ def home_body() -> str:
     <div class="section-inner text-center">
       <h2 class="section-title">Useful Tools for Maine Coon Parents</h2>
       <p class="section-subtitle">Free interactive tools built specifically for the world's largest domestic cat breed.</p>
-      <div class="categories-grid">
-        <a class="category-card" href="/tools#size">
-          <div class="cat-icon" aria-hidden="true">📏</div>
-          <h3>Size Predictor</h3><p>Estimate your kitten's adult weight &amp; length.</p>
+      <div class="hub-grid">
+        <a class="hub-card fade-on-scroll" href="/tools#size">
+          <div class="hub-card-media"><img src="/images/hubs/size.jpg?v=""" + ASSET_V + """" width="600" height="375" alt="Maine Coon adult size predictor" loading="lazy" decoding="async"></div>
+          <div class="hub-card-body"><h3>Size Predictor</h3><p>Estimate your kitten's adult weight from age and current size.</p><span class="hub-card-cta">Open tool</span></div>
         </a>
-        <a class="category-card" href="/tools#cost">
-          <div class="cat-icon" aria-hidden="true">💰</div>
-          <h3>Cost Calculator</h3><p>Year-1 and lifetime cost estimator.</p>
+        <a class="hub-card fade-on-scroll" href="/tools#cost">
+          <div class="hub-card-media"><img src="/images/hubs/cost.jpg?v=""" + ASSET_V + """" width="600" height="375" alt="Maine Coon cost calculator" loading="lazy" decoding="async"></div>
+          <div class="hub-card-body"><h3>Cost Calculator</h3><p>Year-1 setup and lifetime ownership budget planner.</p><span class="hub-card-cta">Open tool</span></div>
         </a>
-        <a class="category-card" href="/tools#grooming">
-          <div class="cat-icon" aria-hidden="true">🪮</div>
-          <h3>Grooming Planner</h3><p>Personalized brushing &amp; bath schedule.</p>
+        <a class="hub-card fade-on-scroll" href="/tools#grooming">
+          <div class="hub-card-media"><img src="/images/hubs/groom_tool.jpg?v=""" + ASSET_V + """" width="600" height="375" alt="Maine Coon grooming planner" loading="lazy" decoding="async"></div>
+          <div class="hub-card-body"><h3>Grooming Planner</h3><p>Brushing and bath cadence for long coats.</p><span class="hub-card-cta">Open tool</span></div>
         </a>
-        <a class="category-card" href="/tools#quiz">
-          <div class="cat-icon" aria-hidden="true">🧩</div>
-          <h3>Compatibility Quiz</h3><p>Is a Maine Coon right for your home?</p>
+        <a class="hub-card fade-on-scroll" href="/tools#quiz">
+          <div class="hub-card-media"><img src="/images/hubs/quiz.jpg?v=""" + ASSET_V + """" width="600" height="375" alt="Maine Coon compatibility quiz" loading="lazy" decoding="async"></div>
+          <div class="hub-card-body"><h3>Compatibility Quiz</h3><p>Is a Maine Coon right for your home and schedule?</p><span class="hub-card-cta">Open tool</span></div>
         </a>
-        <a class="category-card" href="/tools#name">
-          <div class="cat-icon" aria-hidden="true">✨</div>
-          <h3>Name Generator</h3><p>200+ majestic, regal &amp; playful names.</p>
+        <a class="hub-card fade-on-scroll" href="/tools#name">
+          <div class="hub-card-media"><img src="/images/hubs/name.jpg?v=""" + ASSET_V + """" width="600" height="375" alt="Maine Coon name generator" loading="lazy" decoding="async"></div>
+          <div class="hub-card-body"><h3>Name Generator</h3><p>Regal, nature, and playful name ideas.</p><span class="hub-card-cta">Open tool</span></div>
         </a>
       </div>
     </div>
@@ -490,6 +506,9 @@ FEATURED_STORIES = [
     {"slug": "first-30-days",        "title": "Bringing Home Your Maine Coon: The First 30 Days",      "cat": "New Owner Guide",   "read": "8 min read",  "img": "/images/kittens/story-1.jpeg", "alt": "Parent hugging a Maine Coon kitten"},
     {"slug": "hcm-explained",        "title": "HCM in Maine Coons: What Every Buyer Must Understand",  "cat": "Health & Genetics", "read": "11 min read", "img": "/images/cats/window.jpeg", "alt": "Maine Coon lounging by a window"},
     {"slug": "ethical-breeders",     "title": "How to Spot a Truly Ethical Maine Coon Breeder",        "cat": "Buyer's Guide",     "read": "9 min read",  "img": "/images/kittens/story-2.jpeg", "alt": "Maine Coon kitten resting on bed pillows"},
+    {"slug": "size-and-growth",      "title": "Maine Coon Size & Growth: What to Expect Year by Year", "cat": "Breed Science",     "read": "10 min read", "img": "/images/kittens/atlas.jpeg", "alt": "Growing Maine Coon kitten"},
+    {"slug": "polydactyl-maine-coons","title": "Polydactyl Maine Coons: Heritage, Health & Myths",     "cat": "Breed Traits",      "read": "7 min read",  "img": "/images/kittens/thor.jpeg", "alt": "Playful Maine Coon kitten"},
+    {"slug": "best-cat-tree",        "title": "Best Cat Trees for Maine Coons: Weight-Rated Picks",   "cat": "Gear Guide",        "read": "9 min read",  "img": "/images/cats/chair.jpeg", "alt": "Large Maine Coon on sturdy furniture"},
 ]
 
 def featured_kitten_card(k):
@@ -648,68 +667,18 @@ def the_breed_body():
 """ + newsletter_section()
 
 def care_body():
-    topics = [
-        ("Grooming the Long Coat",     "Tools, technique, and a brushing schedule that prevents matting without stressing your cat.", "🪮"),
-        ("Nutrition for Giant Breeds", "How much to feed, best protein sources, and calorie targets by life stage.",                      "🍗"),
-        ("Exercise &amp; Enrichment",  "Climbing structures, leash training, and games that channel their intelligence.",                  "🏃"),
-        ("Health &amp; Wellness",      "Vaccination schedule, parasite prevention, and warning signs to watch.",                           "🩺"),
-        ("Kitten Care: First 30 Days", "What to buy, how to introduce them to your home, and litter-box training.",                        "🐾"),
-        ("Senior Maine Coon Care",     "Diet adjustments, mobility support, and cardiac monitoring for cats 8+ years.",                    "👴"),
-    ]
-    cards = "\n".join(
-        f"""        <a class="category-card fade-on-scroll" href="/stories">
-          <div class="cat-icon" aria-hidden="true">{icon}</div>
-          <h3>{title}</h3>
-          <p>{desc}</p>
-        </a>""" for title, desc, icon in topics
-    )
     return page_header(
         "Maine Coon Care Guides",
-        "Expert-reviewed guides on grooming, nutrition, health, exercise, and lifelong wellness — written specifically for the largest domestic cat breed.",
+        "Vet-informed Maine Coon care: grooming the long coat, giant-breed nutrition, enrichment, vaccines, kitten first 30 days, and senior wellness.",
         [("Home", "/"), ("Care Guides", None)],
-    ) + f"""  <section class="section">
-    <div class="section-inner">
-      <div class="categories-grid">
-{cards}
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-alt">
-    <div class="section-inner text-center">
-      <h2 class="section-title">Coming Soon: The Busy Bee Care Library</h2>
-      <p class="section-subtitle">In-depth, vet-reviewed articles for every stage of Maine Coon ownership. Get notified when each guide launches.</p>
-      <a href="#newsletter" class="btn btn-primary">Notify Me</a>
-    </div>
-  </section>
-
-""" + newsletter_section()
+    ) + "\n" + load_hub("care") + "\n" + newsletter_section()
 
 def stories_body():
-    cards = "\n".join(
-        f"""        <article class="kitten-card fade-on-scroll" id="{s['slug']}">
-          <div class="card-image"><span class="card-badge">Story</span><img src="{s['img']}?v={ASSET_V}" width="640" height="400" alt="{html.escape(s['alt'])}" loading="lazy" decoding="async"></div>
-          <div class="card-body">
-            <p class="card-cat">{html.escape(s['cat'])}</p>
-            <h3><a href="#{s['slug']}">{html.escape(s['title'])}</a></h3>
-            <p class="card-desc">{html.escape(s['read'])} · Updated {YEAR}<br><br>An in-depth, expertly-researched guide following our editorial template (see <a href="/about">about our standards</a>).</p>
-            <p style="margin-top:auto;"><a href="#{s['slug']}" class="btn btn-outline" style="width:100%;">Read Article</a></p>
-          </div>
-        </article>""" for s in FEATURED_STORIES
-    )
     return page_header(
         "Coon Cat Stories",
-        "Real owner journeys, deep-dive breed knowledge, expert interviews, and authoritative health information — all engineered for E-E-A-T excellence.",
+        "Authoritative Maine Coon articles: first 30 days, HCM explained, ethical breeders, size & growth, polydactyl heritage, and weight-rated cat trees.",
         [("Home", "/"), ("Coon Cat Stories", None)],
-    ) + f"""  <section class="section">
-    <div class="section-inner">
-      <div class="cards-grid">
-{cards}
-      </div>
-    </div>
-  </section>
-
-""" + newsletter_section()
+    ) + "\n" + load_hub("stories") + "\n" + newsletter_section()
 
 def community_body():
     return page_header(
@@ -738,28 +707,9 @@ def community_body():
 def tools_body():
     return page_header(
         "Useful Tools for Maine Coon Parents",
-        "Free, interactive tools built specifically for the world's largest domestic cat breed.",
+        "Free Maine Coon tools: adult size predictor, lifetime cost calculator, grooming planner, compatibility quiz, name generator, and daily feeding calculator.",
         [("Home", "/"), ("Useful Tools", None)],
-    ) + """  <section class="section">
-    <div class="section-inner">
-      <div class="categories-grid">
-        <a class="category-card" href="#size"><div class="cat-icon" aria-hidden="true">📏</div><h3>Adult Size Predictor</h3><p>Estimate adult weight &amp; length from kitten metrics.</p></a>
-        <a class="category-card" href="#cost"><div class="cat-icon" aria-hidden="true">💰</div><h3>Lifetime Cost Calculator</h3><p>Year-1 setup &amp; lifetime ownership budget.</p></a>
-        <a class="category-card" href="#grooming"><div class="cat-icon" aria-hidden="true">🪮</div><h3>Grooming Planner</h3><p>Personalized brushing &amp; bath schedule.</p></a>
-        <a class="category-card" href="#quiz"><div class="cat-icon" aria-hidden="true">🧩</div><h3>Compatibility Quiz</h3><p>Is a Maine Coon right for your home?</p></a>
-        <a class="category-card" href="#name"><div class="cat-icon" aria-hidden="true">✨</div><h3>Name Generator</h3><p>200+ majestic, regal &amp; playful names.</p></a>
-        <a class="category-card" href="#feeding"><div class="cat-icon" aria-hidden="true">🥣</div><h3>Daily Feeding Calculator</h3><p>Calorie target by weight, age &amp; activity.</p></a>
-      </div>
-
-      <div class="text-center mt-4" style="background:var(--bg-alt);padding:1.25rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:1.25rem;">
-        <h2>Interactive Tools Launching Soon</h2>
-        <p class="lead">All six calculators are in active development. Subscribe to get notified the moment each tool goes live.</p>
-        <a href="#newsletter" class="btn btn-primary btn-lg">Notify Me</a>
-      </div>
-    </div>
-  </section>
-
-""" + newsletter_section()
+    ) + "\n" + load_hub("tools") + "\n" + newsletter_section()
 
 def shop_body():
     products = [
@@ -1006,39 +956,40 @@ def ethics_body():
 """
 
 # ---- BUILD -----------------------------------------------------------------
+# (filename, title, description, body_fn, extra_scripts|None)
 PAGES = [
     ("index.html",         "Maine Coon Kittens for Sale | Ethical Breeders | Busy Bee Maine Coons",
-        "Browse health-tested Maine Coon kittens from a curated network of ethical USA breeders. HCM, SMA, PKD screened. Lifetime breeder support. Free care guides.", home_body),
+        "Browse health-tested Maine Coon kittens from a curated network of ethical USA breeders. HCM, SMA, PKD screened. Lifetime breeder support. Free care guides.", home_body, None),
     ("kittens.html",       "Available Maine Coon Kittens for Sale | Health-Tested | Busy Bee",
-        "See currently available Maine Coon kittens — gender, color, age & price filters. Every kitten HCM, SMA, PKD & hip screened with full health certificates.", kittens_body),
+        "See currently available Maine Coon kittens — gender, color, age & price filters. Every kitten HCM, SMA, PKD & hip screened with full health certificates.", kittens_body, None),
     ("the-breed.html",     "The Maine Coon: Complete Breed Guide 2026 | Busy Bee Maine Coons",
-        "Definitive Maine Coon breed guide: history, size, temperament, health testing, lifespan & care essentials for the world's largest domestic cat breed.", the_breed_body),
-    ("care.html",          "Maine Coon Care Guides: Grooming, Nutrition, Health | Busy Bee",
-        "Expert-reviewed Maine Coon care guides. Grooming the long coat, giant-breed nutrition, exercise, health, kitten care & senior cat support.", care_body),
-    ("stories.html",       "Coon Cat Stories: Owner Journeys, Health & Expert Articles | Busy Bee",
-        "In-depth Maine Coon articles: owner journeys, breed knowledge, health deep-dives & expert interviews. Researched, vet-reviewed, never AI filler.", stories_body),
+        "Definitive Maine Coon breed guide: history, size, temperament, health testing, lifespan & care essentials for the world's largest domestic cat breed.", the_breed_body, None),
+    ("care.html",          "Maine Coon Care Guide 2026: Grooming, Nutrition, Health | Busy Bee",
+        "Vet-informed Maine Coon care guides: long-coat grooming, giant-breed nutrition, enrichment, vaccines & parasites, kitten first 30 days, and senior wellness.", care_body, None),
+    ("stories.html",       "Maine Coon Stories & Guides: HCM, First 30 Days, Breeders | Busy Bee",
+        "In-depth Maine Coon articles: first 30 days home, HCM explained, ethical breeders, size & growth, polydactyl heritage, and best cat trees for giant breeds.", stories_body, ["/js/stories.js"]),
     ("community.html",     "Busy Bee Maine Coon Community: Forum, Events, Q&A",
-        "Connect with thousands of Maine Coon families worldwide. Forum, local meetups, owner gallery & monthly expert Q&A sessions.", community_body),
-    ("tools.html",         "Free Maine Coon Tools: Size Predictor, Cost Calculator & More",
-        "Free interactive tools built for Maine Coon parents: adult size predictor, lifetime cost calculator, grooming planner, compatibility quiz & name generator.", tools_body),
+        "Connect with thousands of Maine Coon families worldwide. Forum, local meetups, owner gallery & monthly expert Q&A sessions.", community_body, None),
+    ("tools.html",         "Free Maine Coon Tools: Size, Cost, Feeding Calculators | Busy Bee",
+        "Free interactive Maine Coon tools: adult size predictor, lifetime cost calculator, grooming planner, compatibility quiz, name generator & daily feeding calculator.", tools_body, ["/js/tools.js"]),
     ("shop.html",          "Maine Coon Shop: Oversized Beds, Grooming Kits & Giant-Breed Gear",
-        "Premium Maine Coon-specific products: oversized orthopedic beds, long-coat grooming kits, jumbo litter boxes, giant-breed nutrition & accessories.", shop_body),
+        "Premium Maine Coon-specific products: oversized orthopedic beds, long-coat grooming kits, jumbo litter boxes, giant-breed nutrition & accessories.", shop_body, None),
     ("about.html",         "About Busy Bee Maine Coons: Our Mission & Standards",
-        "Learn how Busy Bee Maine Coons connects families with ethical, health-tested breeders — and our editorial, vetting & lifetime support standards.", about_body),
+        "Learn how Busy Bee Maine Coons connects families with ethical, health-tested breeders — and our editorial, vetting & lifetime support standards.", about_body, None),
     ("contact.html",       "Contact Busy Bee Maine Coons | Kitten & Order Support",
-        "Questions about a kitten, a breeder, an order, or a partnership? Contact the Busy Bee team — we reply within one business day.", contact_body),
+        "Questions about a kitten, a breeder, an order, or a partnership? Contact the Busy Bee team — we reply within one business day.", contact_body, None),
     ("cart.html",          "Your Cart | Busy Bee Maine Coons",
-        "Review your Maine Coon kitten reservations and shop items.", cart_body),
+        "Review your Maine Coon kitten reservations and shop items.", cart_body, None),
     ("account.html",       "My Account | Busy Bee Maine Coons",
-        "Sign in to manage your reservations, orders, and Busy Bee Hive membership.", account_body),
+        "Sign in to manage your reservations, orders, and Busy Bee Hive membership.", account_body, None),
     ("privacy.html",       "Privacy Policy | Busy Bee Maine Coons",
-        "How Busy Bee Maine Coons collects, uses, and protects your information. GDPR & CCPA compliant.", privacy_body),
+        "How Busy Bee Maine Coons collects, uses, and protects your information. GDPR & CCPA compliant.", privacy_body, None),
     ("terms.html",         "Terms of Service | Busy Bee Maine Coons",
-        "The agreement governing your use of cooncatcentral.com — reservations, shop orders, and breeder facilitation.", terms_body),
+        "The agreement governing your use of cooncatcentral.com — reservations, shop orders, and breeder facilitation.", terms_body, None),
     ("accessibility.html", "Accessibility Statement | Busy Bee Maine Coons",
-        "Our commitment to WCAG 2.2 AA compliance and inclusive design for all visitors to cooncatcentral.com.", accessibility_body),
+        "Our commitment to WCAG 2.2 AA compliance and inclusive design for all visitors to cooncatcentral.com.", accessibility_body, None),
     ("ethics.html",        "Ethics & Health-Testing Standards | Busy Bee Maine Coons",
-        "The non-negotiable health-testing and ethical-breeding standards every Busy Bee partner breeder agrees to before listing a single kitten.", ethics_body),
+        "The non-negotiable health-testing and ethical-breeding standards every Busy Bee partner breeder agrees to before listing a single kitten.", ethics_body, None),
 ]
 
 def main():
@@ -1047,8 +998,8 @@ def main():
     (OUT / "js").mkdir(exist_ok=True)
     (OUT / "images").mkdir(exist_ok=True)
     written = []
-    for filename, title, desc, body_fn in PAGES:
-        html_doc = page(filename, title, desc, body_fn())
+    for filename, title, desc, body_fn, extra_scripts in PAGES:
+        html_doc = page(filename, title, desc, body_fn(), extra_scripts=extra_scripts)
         path = OUT / filename
         path.write_text(html_doc, encoding="utf-8")
         written.append(path.relative_to(ROOT))
