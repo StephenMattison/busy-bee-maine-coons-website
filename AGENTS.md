@@ -42,6 +42,14 @@ You are working in **one** website repo. Push only to this remote.
 | `scripts/check-site-guide-compliance.py` | Title/meta uniqueness gate |
 | `sync-guide.sh` | Refresh `SITE-GUIDE.md` from local canonical clone |
 
+## Newsletter / Hive list
+
+- **UI:** footer Hive strip + **exit-intent popup** (`newsletter.js`)
+- **API:** `public/functions/api/subscribe.js` → `POST /api/subscribe`
+- **ESP:** MailerLite (lists + drips) via env `MAILERLITE_API_KEY` / `MAILERLITE_GROUP_ID`
+- **Optional:** KV binding `NEWSLETTER`; Resend notify/welcome (`RESEND_API_KEY`, `NEWSLETTER_NOTIFY_TO`, …)
+- Full wire-up steps: **`NEWSLETTER-SETUP.md`**
+
 ## Implementation habits
 
 - Prefer editing **`_build.py`**, then `python3 _build.py`, for nav/footer/meta/chrome so all pages stay consistent

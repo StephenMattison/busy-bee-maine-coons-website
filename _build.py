@@ -23,7 +23,7 @@ SITE = "https://cooncatcentral.com"
 BRAND = "Busy Bee Maine Coons"
 TAGLINE = "Where Gentle Giants Find Their Forever Homes"
 YEAR = datetime.datetime.now(datetime.UTC).year
-ASSET_V = "20260804e"
+ASSET_V = "20260804f"
 # Official Google review destination (update when Place ID is confirmed)
 GOOGLE_REVIEW_URL = "https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews"
 GOOGLE_REVIEW_QR = f"/images/review/google-review-qr.png?v={ASSET_V}"
@@ -239,6 +239,7 @@ def footer():
     </div>
   </div>
 
+""" + exit_intent_popup() + f"""
   <script src="/js/script.js?v={ASSET_V}" defer></script>
   <script src="/js/cart.js?v={ASSET_V}" defer></script>
   <script src="/js/newsletter.js?v={ASSET_V}" defer></script>
@@ -277,18 +278,48 @@ def load_hub(name: str) -> str:
 def newsletter_section() -> str:
     return """  <section class="nl-section" id="newsletter" aria-label="Newsletter signup">
     <div class="nl-inner">
-      <h2>Join the <strong>Busy Bee Hive</strong></h2>
-      <p class="nl-sub">Early access to new litters, expert care advice, and 10% off your first shop order.</p>
-      <form class="nl-form" autocomplete="on" novalidate>
+      <h2>Join the free <strong>Busy Bee Hive</strong></h2>
+      <p class="nl-sub">Get <strong>first look at new litters</strong> (before public posts), practical giant-breed care tips from our guides, and a <strong>welcome offer on oversized shop gear</strong>. No spam — only high-signal updates for people serious about Maine Coons.</p>
+      <ul class="nl-benefits">
+        <li>Early litter alerts from vetted, health-tested breeders</li>
+        <li>Grooming, nutrition &amp; HCM-aware care notes (not filler)</li>
+        <li>Subscriber welcome savings on beds, grooming kits &amp; XL gear</li>
+      </ul>
+      <form class="nl-form" data-nl-source="footer" autocomplete="on" novalidate>
         <label class="sr-only" for="nl-email">Email address</label>
-        <input id="nl-email" type="email" name="email" placeholder="your@email.com" required autocomplete="email">
-        <button type="submit" class="nl-btn">Subscribe</button>
+        <input id="nl-email" type="email" name="email" placeholder="you@email.com" required autocomplete="email">
+        <button type="submit" class="nl-btn">Join free</button>
       </form>
       <p class="nl-success" role="status" aria-live="polite"></p>
       <p class="nl-error" role="alert" aria-live="assertive"></p>
-      <p class="nl-disclaimer">Unsubscribe anytime. We never share your email.</p>
+      <p class="nl-disclaimer">Free forever. Unsubscribe anytime. We never sell your email.</p>
     </div>
   </section>
+"""
+
+def exit_intent_popup() -> str:
+    return f"""  <!-- Exit-intent newsletter capture -->
+  <div class="nl-popup-overlay" id="nl-popup-overlay" role="dialog" aria-modal="true" aria-labelledby="nl-popup-title" aria-hidden="true" hidden>
+    <div class="nl-popup">
+      <button type="button" class="nl-popup-close" aria-label="Close newsletter signup">&times;</button>
+      <p class="nl-popup-kicker">Before you go</p>
+      <h2 id="nl-popup-title">Don’t miss the next gentle giant</h2>
+      <p class="nl-popup-sub">Join the <strong>Busy Bee Hive</strong> free — early litter alerts from ethical, health-tested breeders, expert Maine Coon care tips, and a welcome shop offer on oversized gear.</p>
+      <ul class="nl-benefits nl-benefits-popup">
+        <li>First look at new litters</li>
+        <li>Care tips that actually fit giant breeds</li>
+        <li>Subscriber welcome offer in the shop</li>
+      </ul>
+      <form class="nl-form" data-nl-source="exit" autocomplete="on" novalidate>
+        <label class="sr-only" for="nl-email-exit">Email address</label>
+        <input id="nl-email-exit" type="email" name="email" placeholder="you@email.com" required autocomplete="email">
+        <button type="submit" class="nl-btn">Send me early litter alerts</button>
+      </form>
+      <p class="nl-success" role="status" aria-live="polite"></p>
+      <p class="nl-error" role="alert" aria-live="assertive"></p>
+      <p class="nl-disclaimer">No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
 """
 
 def trust_strip() -> str:
