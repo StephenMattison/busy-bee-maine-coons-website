@@ -3,8 +3,8 @@
  *
  * Primary ESP: Klaviyo (same pattern as Revenge Works).
  * Cloudflare Pages → Settings → Environment variables (Production):
- *   KLAVIYO_API_KEY   Private API key (pk_…)
- *   KLAVIYO_LIST_ID   List ID for Busy Bee Hive (e.g. Xyz123)
+ *   KLAVIYO_API_KEY   Private API key (pk_…) — only required secret
+ *   KLAVIYO_LIST_ID   Optional; defaults to Busy Bee Hive list SzVGkq
  *
  * Optional:
  *   NEWSLETTER         KV binding — backup store + rate limit

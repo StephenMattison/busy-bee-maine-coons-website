@@ -46,7 +46,7 @@ You are working in **one** website repo. Push only to this remote.
 
 - **UI:** footer Hive strip + **exit-intent popup** (`newsletter.js`)
 - **API:** `public/functions/api/subscribe.js` → `POST /api/subscribe`
-- **ESP:** **Klaviyo** (same pattern as Revenge Works) via `KLAVIYO_API_KEY` + `KLAVIYO_LIST_ID`
+- **ESP:** **Klaviyo** list **Busy Bee Hive** id `SzVGkq` (default in subscribe.js); only env required: `KLAVIYO_API_KEY`
 - **Optional:** KV binding `NEWSLETTER`; Resend notify (`RESEND_API_KEY`, `NEWSLETTER_NOTIFY_TO`)
 - Full wire-up: **`NEWSLETTER-SETUP.md`**
 
