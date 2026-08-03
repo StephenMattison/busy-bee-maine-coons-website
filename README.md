@@ -1,6 +1,8 @@
-# Busy Bee Maine Coons — busybeemainecoons.com
+# Busy Bee Maine Coons — cooncatcentral.com
 
 Premier digital platform connecting buyers with ethical, health-tested Maine Coon breeders, plus a curated store of giant-breed-specific products.
+
+**Live:** https://cooncatcentral.com · **Repo:** `StephenMattison/busy-bee-maine-coons-website` · See **`AGENTS.md`** for agent/deploy rules.
 
 ## Source-of-truth documents
 

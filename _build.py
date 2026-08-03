@@ -19,10 +19,14 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 OUT  = ROOT / "public"
 
-SITE = "https://busybeemainecoons.com"
+SITE = "https://cooncatcentral.com"
 BRAND = "Busy Bee Maine Coons"
 TAGLINE = "Where Gentle Giants Find Their Forever Homes"
 YEAR = datetime.datetime.now(datetime.UTC).year
+ASSET_V = "20260803"
+# Official Google review destination (update when Place ID is confirmed)
+GOOGLE_REVIEW_URL = "https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews"
+GOOGLE_REVIEW_QR = f"/images/review/google-review-qr.png?v={ASSET_V}"
 
 # ---- Navigation (from BUSY-BEE-DESIGN.md §2) -------------------------------
 NAV = [
@@ -62,22 +66,35 @@ def head(title: str, description: str, path: str, og_type: str = "website",
   <meta property="og:description" content="{html.escape(description)}">
   <meta property="og:type" content="{og_type}">
   <meta property="og:url" content="{canonical}">
-  <meta property="og:image" content="{SITE}/images/og-default.jpg">
+  <meta property="og:image" content="{SITE}/images/og-default.jpg?v={ASSET_V}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{html.escape(title)}">
+  <meta name="twitter:description" content="{html.escape(description)}">
+  <meta name="twitter:image" content="{SITE}/images/og-default.jpg?v={ASSET_V}">
 
   <!-- Performance: preconnect Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/favicon.ico" sizes="32x32">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css?v={ASSET_V}">
+  <link rel="icon" href="/favicon.svg?v={ASSET_V}" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico?v={ASSET_V}" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v={ASSET_V}">
   <link rel="manifest" href="/site.webmanifest">
 
   {schema_blocks}<script type="application/ld+json">{json.dumps(org_schema(), separators=(",", ":"))}</script>
   <script type="application/ld+json">{json.dumps(website_schema(), separators=(",", ":"))}</script>
+  <script>
+    window.BUSYBEE = {{
+      site: "{SITE}",
+      googleReviewUrl: {json.dumps(GOOGLE_REVIEW_URL)},
+      googleReviewQr: {json.dumps(GOOGLE_REVIEW_QR)},
+      assetVersion: "{ASSET_V}"
+    }};
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -204,9 +221,27 @@ def footer():
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 16V4M4 10l6-6 6 6"/></svg>
   </button>
 
-  <script src="/js/script.js" defer></script>
-  <script src="/js/cart.js" defer></script>
-  <script src="/js/newsletter.js" defer></script>
+  <!-- Floating Google Review CTA (SITE-GUIDE §0) -->
+  <button type="button" class="review-fab" id="review-fab" aria-haspopup="dialog" aria-controls="review-dialog" aria-label="Leave a Google review">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    <span class="review-fab-label">Review Us</span>
+  </button>
+  <div class="review-dialog" id="review-dialog" role="dialog" aria-modal="true" aria-labelledby="review-dialog-title" hidden>
+    <div class="review-dialog-panel">
+      <button type="button" class="review-dialog-close" id="review-dialog-close" aria-label="Close review dialog">&times;</button>
+      <h2 id="review-dialog-title">Leave an honest Google review</h2>
+      <p>If we earned your trust, please leave an honest Google review. Your feedback helps other families choose confidently.</p>
+      <div class="review-qr">
+        <img data-review-qr src="{GOOGLE_REVIEW_QR}" width="200" height="200" alt="Scan to open our Google review page" loading="lazy" decoding="async">
+      </div>
+      <a class="btn-review" data-review-link="dialog" href="{GOOGLE_REVIEW_URL}" rel="noopener noreferrer" target="_blank">Open Google Reviews</a>
+      <p class="review-compliance">We welcome honest feedback from all customers and do not offer incentives for reviews.</p>
+    </div>
+  </div>
+
+  <script src="/js/script.js?v={ASSET_V}" defer></script>
+  <script src="/js/cart.js?v={ASSET_V}" defer></script>
+  <script src="/js/newsletter.js?v={ASSET_V}" defer></script>
 </body>
 </html>
 """
@@ -289,13 +324,31 @@ def home_body() -> str:
           <a href="/the-breed" class="btn btn-outline btn-lg" style="color:#fff;border-color:#fff;">Learn About the Breed</a>
         </div>
       </div>
-      <div class="hero-image" aria-hidden="true">
-        <span class="placeholder-art">🦁</span>
+      <div class="hero-image">
+        <img src="/images/kittens/hero.jpeg?v=""" + ASSET_V + """" width="640" height="480" alt="Fluffy Maine Coon kitten with tongue out among flowers" decoding="async" fetchpriority="high">
       </div>
     </div>
   </section>
 
-""" + trust_strip() + """
+""" + trust_strip() + f"""
+  <section class="section review-home" id="reviews" aria-labelledby="review-home-title">
+    <div class="section-inner review-home-inner">
+      <div>
+        <p class="review-home-stars" aria-label="5 out of 5 stars">★★★★★</p>
+        <h2 id="review-home-title" class="section-title" style="text-align:left;margin-bottom:.5rem;">Loved by Maine Coon families</h2>
+        <p class="section-subtitle" style="text-align:left;margin:0 0 1.25rem;">If we earned your trust, please leave an honest Google review. Your feedback helps other families choose confidently — we never offer incentives for reviews.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" data-review-link="homepage" href="{GOOGLE_REVIEW_URL}" rel="noopener noreferrer" target="_blank">Leave a Google Review</a>
+          <button type="button" class="btn btn-outline btn-lg" data-open-review="homepage">Scan QR code</button>
+        </div>
+      </div>
+      <div class="review-home-qr">
+        <img data-review-qr src="{GOOGLE_REVIEW_QR}" width="160" height="160" alt="Scan to open our Google review page" loading="lazy" decoding="async">
+        <p>Scan with your phone</p>
+      </div>
+    </div>
+  </section>
+""" + """
   <section class="section">
     <div class="section-inner">
       <h2 class="section-title">Featured Kittens</h2>
@@ -427,21 +480,22 @@ def home_body() -> str:
 
 # Sample data ----------------------------------------------------------------
 FEATURED_KITTENS = [
-    {"id": "honey",   "name": "Honey",   "color": "Cream Tabby",        "age": 10, "gender": "Female", "price": 2800, "badge": "Reservation Open", "emoji": "🐈"},
-    {"id": "atlas",   "name": "Atlas",   "color": "Brown Mackerel",     "age": 12, "gender": "Male",   "price": 3200, "badge": "Health Verified",  "emoji": "🦁"},
-    {"id": "willow",  "name": "Willow",  "color": "Silver Smoke",       "age": 9,  "gender": "Female", "price": 3000, "badge": "New Litter",       "emoji": "🐅"},
-    {"id": "thor",    "name": "Thor",    "color": "Red Tabby Polydactyl","age": 14,"gender": "Male",   "price": 3500, "badge": "Show Quality",     "emoji": "🐯"},
+    {"id": "honey",   "name": "Honey",   "color": "Cream Tabby",        "age": 10, "gender": "Female", "price": 2800, "badge": "Reservation Open", "img": "/images/kittens/honey.jpeg", "alt": "Honey, a cream tabby Maine Coon kitten on a pillow"},
+    {"id": "atlas",   "name": "Atlas",   "color": "Brown Mackerel",     "age": 12, "gender": "Male",   "price": 3200, "badge": "Health Verified",  "img": "/images/kittens/atlas.jpeg", "alt": "Atlas, a brown mackerel Maine Coon kitten on the floor"},
+    {"id": "willow",  "name": "Willow",  "color": "Silver Smoke",       "age": 9,  "gender": "Female", "price": 3000, "badge": "New Litter",       "img": "/images/kittens/willow.jpeg", "alt": "Willow, a silver smoke Maine Coon kitten sleeping in a basket"},
+    {"id": "thor",    "name": "Thor",    "color": "Red Tabby Polydactyl","age": 14,"gender": "Male",   "price": 3500, "badge": "Show Quality",     "img": "/images/kittens/thor.jpeg", "alt": "Thor, a red tabby Maine Coon kitten with a ball"},
 ]
 
 FEATURED_STORIES = [
-    {"slug": "first-30-days",        "title": "Bringing Home Your Maine Coon: The First 30 Days",      "cat": "New Owner Guide",   "read": "8 min read"},
-    {"slug": "hcm-explained",        "title": "HCM in Maine Coons: What Every Buyer Must Understand",  "cat": "Health & Genetics", "read": "11 min read"},
-    {"slug": "ethical-breeders",     "title": "How to Spot a Truly Ethical Maine Coon Breeder",        "cat": "Buyer's Guide",     "read": "9 min read"},
+    {"slug": "first-30-days",        "title": "Bringing Home Your Maine Coon: The First 30 Days",      "cat": "New Owner Guide",   "read": "8 min read",  "img": "/images/kittens/story-1.jpeg", "alt": "Parent hugging a Maine Coon kitten"},
+    {"slug": "hcm-explained",        "title": "HCM in Maine Coons: What Every Buyer Must Understand",  "cat": "Health & Genetics", "read": "11 min read", "img": "/images/cats/window.jpeg", "alt": "Maine Coon lounging by a window"},
+    {"slug": "ethical-breeders",     "title": "How to Spot a Truly Ethical Maine Coon Breeder",        "cat": "Buyer's Guide",     "read": "9 min read",  "img": "/images/kittens/story-2.jpeg", "alt": "Maine Coon kitten resting on bed pillows"},
 ]
 
 def featured_kitten_card(k):
+    img = f'<img src="{k["img"]}?v={ASSET_V}" width="640" height="400" alt="{html.escape(k["alt"])}" loading="lazy" decoding="async">'
     return f"""        <article class="kitten-card fade-on-scroll" data-card data-gender="{k['gender'].lower()}" data-price="{k['price']}" data-age="{k['age']}">
-          <div class="card-image" aria-hidden="true"><span class="card-badge gold">{html.escape(k['badge'])}</span><span style="font-size:5rem;">{k['emoji']}</span></div>
+          <div class="card-image"><span class="card-badge gold">{html.escape(k['badge'])}</span>{img}</div>
           <div class="card-body">
             <p class="card-cat">{html.escape(k['color'])}</p>
             <h3><a href="/kittens#{k['id']}">{html.escape(k['name'])}</a></h3>
@@ -457,8 +511,9 @@ def featured_kitten_card(k):
         </article>"""
 
 def featured_story_card(s):
+    img = f'<img src="{s["img"]}?v={ASSET_V}" width="640" height="400" alt="{html.escape(s["alt"])}" loading="lazy" decoding="async">'
     return f"""        <article class="kitten-card fade-on-scroll">
-          <div class="card-image" aria-hidden="true"><span class="card-badge">Story</span><span style="font-size:4rem;">📖</span></div>
+          <div class="card-image"><span class="card-badge">Story</span>{img}</div>
           <div class="card-body">
             <p class="card-cat">{html.escape(s['cat'])}</p>
             <h3><a href="/stories#{s['slug']}">{html.escape(s['title'])}</a></h3>
@@ -472,7 +527,7 @@ def featured_story_card(s):
 def kittens_body():
     cards = "\n".join(
         f"""        <article class="kitten-card fade-on-scroll" id="{k['id']}" data-card data-gender="{k['gender'].lower()}" data-price="{k['price']}" data-age="{k['age']}" data-color="{k['color'].lower().split()[0]}">
-          <div class="card-image" aria-hidden="true"><span class="card-badge gold">{html.escape(k['badge'])}</span><span style="font-size:5rem;">{k['emoji']}</span></div>
+          <div class="card-image"><span class="card-badge gold">{html.escape(k['badge'])}</span><img src="{k['img']}?v={ASSET_V}" width="640" height="400" alt="{html.escape(k['alt'])}" loading="lazy" decoding="async"></div>
           <div class="card-body">
             <p class="card-cat">{html.escape(k['color'])}</p>
             <h3>{html.escape(k['name'])}</h3>
@@ -633,7 +688,7 @@ def care_body():
 def stories_body():
     cards = "\n".join(
         f"""        <article class="kitten-card fade-on-scroll" id="{s['slug']}">
-          <div class="card-image" aria-hidden="true"><span class="card-badge">Story</span><span style="font-size:4rem;">📖</span></div>
+          <div class="card-image"><span class="card-badge">Story</span><img src="{s['img']}?v={ASSET_V}" width="640" height="400" alt="{html.escape(s['alt'])}" loading="lazy" decoding="async"></div>
           <div class="card-body">
             <p class="card-cat">{html.escape(s['cat'])}</p>
             <h3><a href="#{s['slug']}">{html.escape(s['title'])}</a></h3>
@@ -882,10 +937,10 @@ def privacy_body():
 """
 
 def terms_body():
-    return page_header("Terms of Service", "The agreement governing your use of busybeemainecoons.com.", [("Home", "/"), ("Terms", None)]) + f"""  <article class="article">
+    return page_header("Terms of Service", "The agreement governing your use of cooncatcentral.com.", [("Home", "/"), ("Terms", None)]) + f"""  <article class="article">
     <p class="article-meta">Last updated: {YEAR}-04-27</p>
     <h2>1. Agreement</h2>
-    <p>By using busybeemainecoons.com you agree to these terms. If you do not agree, please discontinue use.</p>
+    <p>By using cooncatcentral.com you agree to these terms. If you do not agree, please discontinue use.</p>
     <h2>2. Kitten Reservations</h2>
     <p>Reservations are facilitated between you and our partner breeders. Deposits are non-refundable except where agreed in writing with the breeder. Final adoption is contingent on a successful match between buyer and breeder.</p>
     <h2>3. Shop Orders</h2>
@@ -979,9 +1034,9 @@ PAGES = [
     ("privacy.html",       "Privacy Policy | Busy Bee Maine Coons",
         "How Busy Bee Maine Coons collects, uses, and protects your information. GDPR & CCPA compliant.", privacy_body),
     ("terms.html",         "Terms of Service | Busy Bee Maine Coons",
-        "The agreement governing your use of busybeemainecoons.com — reservations, shop orders, and breeder facilitation.", terms_body),
+        "The agreement governing your use of cooncatcentral.com — reservations, shop orders, and breeder facilitation.", terms_body),
     ("accessibility.html", "Accessibility Statement | Busy Bee Maine Coons",
-        "Our commitment to WCAG 2.2 AA compliance and inclusive design for all visitors to busybeemainecoons.com.", accessibility_body),
+        "Our commitment to WCAG 2.2 AA compliance and inclusive design for all visitors to cooncatcentral.com.", accessibility_body),
     ("ethics.html",        "Ethics & Health-Testing Standards | Busy Bee Maine Coons",
         "The non-negotiable health-testing and ethical-breeding standards every Busy Bee partner breeder agrees to before listing a single kitten.", ethics_body),
 ]

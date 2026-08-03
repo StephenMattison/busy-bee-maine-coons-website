@@ -7,30 +7,43 @@
   <meta name="description" content="Review your Maine Coon kitten reservations and shop items.">
   <meta name="theme-color" content="#1A3C34">
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" href="https://busybeemainecoons.com/cart">
+  <link rel="canonical" href="https://cooncatcentral.com/cart">
 
   <!-- Open Graph / Twitter -->
   <meta property="og:site_name" content="Busy Bee Maine Coons">
   <meta property="og:title" content="Your Cart | Busy Bee Maine Coons">
   <meta property="og:description" content="Review your Maine Coon kitten reservations and shop items.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://busybeemainecoons.com/cart">
-  <meta property="og:image" content="https://busybeemainecoons.com/images/og-default.jpg">
+  <meta property="og:url" content="https://cooncatcentral.com/cart">
+  <meta property="og:image" content="https://cooncatcentral.com/images/og-default.jpg?v=20260803">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Your Cart | Busy Bee Maine Coons">
+  <meta name="twitter:description" content="Review your Maine Coon kitten reservations and shop items.">
+  <meta name="twitter:image" content="https://cooncatcentral.com/images/og-default.jpg?v=20260803">
 
   <!-- Performance: preconnect Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/favicon.ico" sizes="32x32">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css?v=20260803">
+  <link rel="icon" href="/favicon.svg?v=20260803" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico?v=20260803" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260803">
   <link rel="manifest" href="/site.webmanifest">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Busy Bee Maine Coons","url":"https://busybeemainecoons.com","logo":"https://busybeemainecoons.com/images/logo.png","description":"Premier marketplace connecting buyers with ethical, health-tested Maine Coon breeders. Curated giant-breed cat products and expert care guides.","sameAs":[]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Busy Bee Maine Coons","url":"https://busybeemainecoons.com","potentialAction":{"@type":"SearchAction","target":"https://busybeemainecoons.com/stories?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Busy Bee Maine Coons","url":"https://cooncatcentral.com","logo":"https://cooncatcentral.com/images/logo.png","description":"Premier marketplace connecting buyers with ethical, health-tested Maine Coon breeders. Curated giant-breed cat products and expert care guides.","sameAs":[]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Busy Bee Maine Coons","url":"https://cooncatcentral.com","potentialAction":{"@type":"SearchAction","target":"https://cooncatcentral.com/stories?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+  <script>
+    window.BUSYBEE = {
+      site: "https://cooncatcentral.com",
+      googleReviewUrl: "https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews",
+      googleReviewQr: "/images/review/google-review-qr.png?v=20260803",
+      assetVersion: "20260803"
+    };
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -153,8 +166,26 @@
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 16V4M4 10l6-6 6 6"/></svg>
   </button>
 
-  <script src="/js/script.js" defer></script>
-  <script src="/js/cart.js" defer></script>
-  <script src="/js/newsletter.js" defer></script>
+  <!-- Floating Google Review CTA (SITE-GUIDE §0) -->
+  <button type="button" class="review-fab" id="review-fab" aria-haspopup="dialog" aria-controls="review-dialog" aria-label="Leave a Google review">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    <span class="review-fab-label">Review Us</span>
+  </button>
+  <div class="review-dialog" id="review-dialog" role="dialog" aria-modal="true" aria-labelledby="review-dialog-title" hidden>
+    <div class="review-dialog-panel">
+      <button type="button" class="review-dialog-close" id="review-dialog-close" aria-label="Close review dialog">&times;</button>
+      <h2 id="review-dialog-title">Leave an honest Google review</h2>
+      <p>If we earned your trust, please leave an honest Google review. Your feedback helps other families choose confidently.</p>
+      <div class="review-qr">
+        <img data-review-qr src="/images/review/google-review-qr.png?v=20260803" width="200" height="200" alt="Scan to open our Google review page" loading="lazy" decoding="async">
+      </div>
+      <a class="btn-review" data-review-link="dialog" href="https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews" rel="noopener noreferrer" target="_blank">Open Google Reviews</a>
+      <p class="review-compliance">We welcome honest feedback from all customers and do not offer incentives for reviews.</p>
+    </div>
+  </div>
+
+  <script src="/js/script.js?v=20260803" defer></script>
+  <script src="/js/cart.js?v=20260803" defer></script>
+  <script src="/js/newsletter.js?v=20260803" defer></script>
 </body>
 </html>

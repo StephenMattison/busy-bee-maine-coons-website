@@ -130,4 +130,82 @@
       a.setAttribute('aria-current', 'page');
     }
   });
+
+  /* ---------- GOOGLE REVIEW SYSTEM (SITE-GUIDE §0) ---------- */
+  const cfg = window.BUSYBEE || {};
+  const reviewUrl =
+    cfg.googleReviewUrl ||
+    'https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews';
+  const reviewQr =
+    cfg.googleReviewQr ||
+    '/images/review/google-review-qr.png' +
+      (cfg.assetVersion ? '?v=' + cfg.assetVersion : '');
+  const reviewFab = document.getElementById('review-fab');
+  const reviewDialog = document.getElementById('review-dialog');
+  const reviewClose = document.getElementById('review-dialog-close');
+  let lastFocus = null;
+
+  function track(eventName, payload) {
+    try {
+      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+        window.dataLayer.push(Object.assign({ event: eventName }, payload || {}));
+      }
+    } catch (err) { /* analytics optional */ }
+  }
+
+  function openReview(source) {
+    if (!reviewDialog) return;
+    lastFocus = document.activeElement;
+    reviewDialog.hidden = false;
+    document.body.classList.add('dialog-open');
+    track('review_cta_open', { source: source || 'fab' });
+    const closeBtn = reviewClose || reviewDialog.querySelector('button');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeReview() {
+    if (!reviewDialog) return;
+    reviewDialog.hidden = true;
+    document.body.classList.remove('dialog-open');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  if (reviewFab) {
+    reviewFab.addEventListener('click', function () {
+      openReview('floating');
+    });
+  }
+
+  document.querySelectorAll('[data-open-review]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      openReview(el.getAttribute('data-open-review') || 'inline');
+    });
+  });
+
+  if (reviewClose) {
+    reviewClose.addEventListener('click', closeReview);
+  }
+
+  if (reviewDialog) {
+    reviewDialog.addEventListener('click', function (e) {
+      if (e.target === reviewDialog) closeReview();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !reviewDialog.hidden) closeReview();
+    });
+  }
+
+  document.querySelectorAll('[data-review-link]').forEach(function (el) {
+    el.setAttribute('href', reviewUrl);
+    el.addEventListener('click', function () {
+      track('review_link_click', {
+        source: el.getAttribute('data-review-link') || 'unknown',
+      });
+    });
+  });
+
+  document.querySelectorAll('img[data-review-qr]').forEach(function (img) {
+    img.setAttribute('src', reviewQr);
+  });
 })();

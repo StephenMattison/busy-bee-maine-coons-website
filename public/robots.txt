@@ -4,4 +4,5 @@ Disallow: /account
 Disallow: /cart
 Disallow: /api/
 
-Sitemap: https://busybeemainecoons.com/sitemap.xml
+# Agent discovery: https://cooncatcentral.com/llms.txt
+Sitemap: https://cooncatcentral.com/sitemap.xml

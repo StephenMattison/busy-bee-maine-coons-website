@@ -1,0 +1,24 @@
+# Busy Bee Maine Coons
+
+> Ethical, health-tested Maine Coon kittens from a curated USA breeder network, plus giant-breed care guides, tools, and shop gear. Live site: cooncatcentral.com (brand: Busy Bee Maine Coons).
+
+## Primary pages
+
+- [Home](https://cooncatcentral.com/)
+- [Available Kittens](https://cooncatcentral.com/kittens)
+- [The Breed](https://cooncatcentral.com/the-breed)
+- [Care Guides](https://cooncatcentral.com/care)
+- [Coon Cat Stories](https://cooncatcentral.com/stories)
+- [Community](https://cooncatcentral.com/community)
+- [Useful Tools](https://cooncatcentral.com/tools)
+- [Shop](https://cooncatcentral.com/shop)
+- [About](https://cooncatcentral.com/about)
+- [Contact](https://cooncatcentral.com/contact)
+- [Ethics & Health Testing](https://cooncatcentral.com/ethics)
+- [Accessibility](https://cooncatcentral.com/accessibility)
+- [Privacy Policy](https://cooncatcentral.com/privacy)
+- [Terms of Service](https://cooncatcentral.com/terms)
+
+## Contact
+
+- Site: https://cooncatcentral.com/contact
