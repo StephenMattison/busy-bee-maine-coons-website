@@ -23,7 +23,7 @@ SITE = "https://cooncatcentral.com"
 BRAND = "Busy Bee Maine Coons"
 TAGLINE = "Where Gentle Giants Find Their Forever Homes"
 YEAR = datetime.datetime.now(datetime.UTC).year
-ASSET_V = "20260803b"
+ASSET_V = "20260803c"
 # Official Google review destination (update when Place ID is confirmed)
 GOOGLE_REVIEW_URL = "https://www.google.com/search?q=Busy+Bee+Maine+Coons+cooncatcentral.com+reviews"
 GOOGLE_REVIEW_QR = f"/images/review/google-review-qr.png?v={ASSET_V}"
@@ -576,7 +576,7 @@ def kittens_body():
 {cards}
       </div>
 
-      <div class="text-center mt-4" style="background:var(--bg-alt);padding:2rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:3rem;">
+      <div class="text-center mt-4" style="background:var(--bg-alt);padding:1.25rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:1.25rem;">
         <h2>Don't See the Right Kitten?</h2>
         <p class="lead">New litters arrive monthly. Join the Busy Bee Hive for first-look access to upcoming kittens before they're listed publicly.</p>
         <a href="#newsletter" class="btn btn-primary btn-lg">Join the Waitlist</a>
@@ -725,7 +725,7 @@ def community_body():
         <a class="category-card" href="#qa"><div class="cat-icon" aria-hidden="true">🎓</div><h3>Expert Q&amp;A</h3><p>Monthly live sessions with vets, breeders, and behaviorists.</p></a>
       </div>
 
-      <div class="text-center mt-4" style="background:var(--bg-alt);padding:2.5rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:3rem;">
+      <div class="text-center mt-4" style="background:var(--bg-alt);padding:1.25rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:1.25rem;">
         <h2>The Hive Is Buzzing 🐝</h2>
         <p class="lead">The Busy Bee community platform is launching soon. Join the waitlist to be among the first members and receive a founding member badge.</p>
         <a href="#newsletter" class="btn btn-primary btn-lg">Join the Waitlist</a>
@@ -751,7 +751,7 @@ def tools_body():
         <a class="category-card" href="#feeding"><div class="cat-icon" aria-hidden="true">🥣</div><h3>Daily Feeding Calculator</h3><p>Calorie target by weight, age &amp; activity.</p></a>
       </div>
 
-      <div class="text-center mt-4" style="background:var(--bg-alt);padding:2.5rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:3rem;">
+      <div class="text-center mt-4" style="background:var(--bg-alt);padding:1.25rem;border-radius:var(--radius-lg);border:1px solid var(--gray-200);margin-top:1.25rem;">
         <h2>Interactive Tools Launching Soon</h2>
         <p class="lead">All six calculators are in active development. Subscribe to get notified the moment each tool goes live.</p>
         <a href="#newsletter" class="btn btn-primary btn-lg">Notify Me</a>
