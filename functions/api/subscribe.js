@@ -61,12 +61,8 @@ async function addKlaviyo(env, email, fields) {
                     type: 'profile',
                     attributes: {
                       email,
-                      properties: {
-                        signup_source: fields.source || 'website',
-                        signup_path: fields.path || '',
-                        brand: 'Busy Bee Maine Coons',
-                        site: 'cooncatcentral.com',
-                      },
+                      // Note: profile-subscription-bulk-create-jobs rejects `properties`
+                      // on this revision — keep payload aligned with Revenge Works.
                       subscriptions: {
                         email: {
                           marketing: {
