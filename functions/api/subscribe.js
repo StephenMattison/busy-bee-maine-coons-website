@@ -188,10 +188,6 @@ export async function onRequestPost({ request, env }) {
       return json({
         ok: false,
         error: 'We could not complete your subscription right now. Please try again.',
-        code: 'klaviyo_error',
-        klaviyoStatus: klaviyo.status || 0,
-        // Safe short hint for dashboard debugging (no API key). Remove once stable.
-        detail: typeof klaviyo.body === 'string' ? klaviyo.body.slice(0, 240) : '',
       }, 502);
     }
   }
