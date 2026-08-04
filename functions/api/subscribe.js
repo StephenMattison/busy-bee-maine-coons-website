@@ -32,63 +32,72 @@ function json(body, status = 200) {
 const DEFAULT_KLAVIYO_LIST_ID = 'SzVGkq';
 
 async function addKlaviyo(env, email, fields) {
-  const apiKey = env.KLAVIYO_API_KEY;
-  const listId = env.KLAVIYO_LIST_ID || DEFAULT_KLAVIYO_LIST_ID;
-  if (!apiKey) return { skipped: true };
+  const apiKey = (env.KLAVIYO_API_KEY || '').trim();
+  const listId = (env.KLAVIYO_LIST_ID || DEFAULT_KLAVIYO_LIST_ID || '').trim();
+  if (!apiKey) return { skipped: true, reason: 'missing_api_key' };
+  if (!listId) return { skipped: true, reason: 'missing_list_id' };
 
-  const res = await fetch(
-    'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: 'Klaviyo-API-Key ' + apiKey,
-        'Content-Type': 'application/json',
-        revision: KLAVIYO_REVISION,
-      },
-      body: JSON.stringify({
-        data: {
-          type: 'profile-subscription-bulk-create-job',
-          attributes: {
-            custom_source: 'Busy Bee Hive website',
-            profiles: {
-              data: [
-                {
-                  type: 'profile',
-                  attributes: {
-                    email,
-                    properties: {
-                      signup_source: fields.source || 'website',
-                      signup_path: fields.path || '',
-                      brand: 'Busy Bee Maine Coons',
-                      site: 'cooncatcentral.com',
-                    },
-                    subscriptions: {
-                      email: {
-                        marketing: {
-                          consent: 'SUBSCRIBED',
-                          consented_at: new Date().toISOString(),
+  let res;
+  try {
+    res = await fetch(
+      'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: 'Klaviyo-API-Key ' + apiKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          revision: KLAVIYO_REVISION,
+        },
+        // Match Revenge Works payload shape (proven on same account pattern)
+        body: JSON.stringify({
+          data: {
+            type: 'profile-subscription-bulk-create-job',
+            attributes: {
+              custom_source: 'Busy Bee Hive website',
+              profiles: {
+                data: [
+                  {
+                    type: 'profile',
+                    attributes: {
+                      email,
+                      properties: {
+                        signup_source: fields.source || 'website',
+                        signup_path: fields.path || '',
+                        brand: 'Busy Bee Maine Coons',
+                        site: 'cooncatcentral.com',
+                      },
+                      subscriptions: {
+                        email: {
+                          marketing: {
+                            consent: 'SUBSCRIBED',
+                            consented_at: new Date().toISOString(),
+                          },
                         },
                       },
                     },
                   },
-                },
-              ],
+                ],
+              },
+            },
+            relationships: {
+              list: { data: { type: 'list', id: listId } },
             },
           },
-          relationships: {
-            list: { data: { type: 'list', id: listId } },
-          },
-        },
-      }),
-    }
-  );
+        }),
+      }
+    );
+  } catch (err) {
+    console.error('[subscribe] Klaviyo fetch failed', err);
+    return { ok: false, status: 0, body: String(err && err.message ? err.message : err) };
+  }
 
   if (res.ok || res.status === 202 || res.status === 409) {
     return { ok: true, status: res.status };
   }
   const text = await res.text();
   console.error('[subscribe] Klaviyo error', res.status, text.slice(0, 500));
-  return { ok: false, status: res.status, body: text.slice(0, 300) };
+  return { ok: false, status: res.status, body: text.slice(0, 400) };
 }
 
 async function notifyAdmin(env, email, fields) {
@@ -169,13 +178,24 @@ export async function onRequestPost({ request, env }) {
 
   const klaviyo = await addKlaviyo(env, email, { source, path });
   if (klaviyo.skipped) {
-    console.warn('[subscribe] KLAVIYO_API_KEY or KLAVIYO_LIST_ID not set');
+    console.warn('[subscribe] Klaviyo skipped:', klaviyo.reason || 'missing config');
+    if (!env.NEWSLETTER) {
+      return json({
+        ok: false,
+        error: 'Newsletter is not configured yet. Please try again later.',
+        code: klaviyo.reason || 'klaviyo_skipped',
+      }, 503);
+    }
   } else if (klaviyo.ok === false) {
     // Still succeed if KV stored; otherwise fail so visitor can retry
     if (!env.NEWSLETTER) {
       return json({
         ok: false,
         error: 'We could not complete your subscription right now. Please try again.',
+        code: 'klaviyo_error',
+        klaviyoStatus: klaviyo.status || 0,
+        // Safe short hint for dashboard debugging (no API key). Remove once stable.
+        detail: typeof klaviyo.body === 'string' ? klaviyo.body.slice(0, 240) : '',
       }, 502);
     }
   }
