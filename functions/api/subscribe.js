@@ -28,10 +28,13 @@ function json(body, status = 200) {
   });
 }
 
+// Busy Bee Hive list (klaviyo.com) — override with env KLAVIYO_LIST_ID if needed
+const DEFAULT_KLAVIYO_LIST_ID = 'SzVGkq';
+
 async function addKlaviyo(env, email, fields) {
   const apiKey = env.KLAVIYO_API_KEY;
-  const listId = env.KLAVIYO_LIST_ID;
-  if (!apiKey || !listId) return { skipped: true };
+  const listId = env.KLAVIYO_LIST_ID || DEFAULT_KLAVIYO_LIST_ID;
+  if (!apiKey) return { skipped: true };
 
   const res = await fetch(
     'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/',

@@ -20,6 +20,8 @@ All work on this site **must** strictly follow these files:
 ├── BUSY-BEE-*.md           # business / design / blog source-of-truth
 ├── SITE-GUIDE.md           # universal site standard
 ├── README.md
+├── functions/api/          # Cloudflare Pages Functions (repo root, not inside public/)
+│   └── subscribe.js        # POST /api/subscribe → Klaviyo Busy Bee Hive
 └── public/                 # ← Cloudflare Pages build output directory
     ├── index.html          # Home
     ├── kittens.html        # Available Kittens
@@ -40,7 +42,6 @@ All work on this site **must** strictly follow these files:
     ├── css/style.css
     ├── js/{script,cart,newsletter}.js
     ├── images/             # (add assets here)
-    ├── functions/api/      # Cloudflare Pages Functions
     ├── _headers            # Security + caching headers
     ├── _redirects          # Apex/clean-URL redirects
     ├── robots.txt

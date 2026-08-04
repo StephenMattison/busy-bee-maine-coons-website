@@ -36,7 +36,7 @@ You are working in **one** website repo. Push only to this remote.
 | `public/css/style.css` | Shared CSS |
 | `public/js/*.js` | Shared JS (`script.js` = chrome + reviews + filters) |
 | `public/images/` | Assets (prefer `kittens/`, `cats/`, `review/` — no spaces in paths) |
-| `public/functions/api/` | Cloudflare Pages Functions (e.g. newsletter) |
+| `functions/api/` | Cloudflare Pages Functions (repo root; e.g. newsletter) |
 | `public/_headers`, `_redirects` | Edge headers / redirects |
 | `public/llms.txt` | Mandatory agent discovery file |
 | `scripts/check-site-guide-compliance.py` | Title/meta uniqueness gate |
@@ -45,7 +45,7 @@ You are working in **one** website repo. Push only to this remote.
 ## Newsletter / Hive list
 
 - **UI:** footer Hive strip + **exit-intent popup** (`newsletter.js`)
-- **API:** `public/functions/api/subscribe.js` → `POST /api/subscribe`
+- **API:** `functions/api/subscribe.js` → `POST /api/subscribe`
 - **ESP:** **Klaviyo** list **Busy Bee Hive** id `SzVGkq` (default in subscribe.js); only env required: `KLAVIYO_API_KEY`
 - **Optional:** KV binding `NEWSLETTER`; Resend notify (`RESEND_API_KEY`, `NEWSLETTER_NOTIFY_TO`)
 - Full wire-up: **`NEWSLETTER-SETUP.md`**
