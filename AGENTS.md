@@ -66,6 +66,24 @@ You are working in **one** website repo. Push only to this remote.
 - `GOOGLE_REVIEW_URL` — official review destination (update when Place ID known)
 - `BRAND`, `TAGLINE`, `NAV`
 
+## Commands
+
+- Rebuild HTML: `python3 _build.py` (after `_build.py` / shared chrome changes)
+- Compliance: `cd public && python3 ../scripts/check-site-guide-compliance.py`
+- Deploy: `git push origin main` → wait ~1–3 min → verify **https://cooncatcentral.com**
+
+## Boundaries
+
+- This remote only; never force-push or amend published history
+- Never edit `SITE-GUIDE.md` here (canonical site-guide → `./sync-guide.sh`)
+- Never commit secrets, API keys, or `.env`
+- Do not invent domains, ratings, phones, or review incentives
+
+## Security
+
+- Secrets only in Cloudflare Pages env (e.g. `KLAVIYO_API_KEY`); never in git
+- Treat form / `/api/*` input as untrusted (validate in Pages Functions)
+
 ## New chat sessions
 
 User often hits **+** only to reset context. On short prompts (“continue”, “next”), use git status/log + files; apply rules above. Do not ask them to restate SITE-GUIDE / commit-push / caveman.
