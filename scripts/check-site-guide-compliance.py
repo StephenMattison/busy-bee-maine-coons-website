@@ -6,9 +6,17 @@ Current enforced rules:
 - Every indexable HTML page has a non-empty meta description.
 - Titles are unique across indexable pages.
 - Meta descriptions are unique across indexable pages.
-- Root llms.txt exists, has a Markdown H1 (# …), and at least one Markdown link.
+- Deploy-root llms.txt exists, has a Markdown H1 (# …), and at least one Markdown link.
 
 Indexable means the page does not contain a robots meta tag with noindex.
+
+Pages root detection (important for Cloudflare Pages):
+- If public/llms.txt or public/index.html → check only public/
+- Else if web/llms.txt or web/index.html → check only web/
+- Else → check the git/repo cwd (root HTML sites)
+
+This avoids false failures on builder fragments, email HTML, PHP sources,
+Pi apps, and other non-shipped trees when only SITE-GUIDE.md changes on a PR.
 """
 
 from __future__ import annotations
@@ -21,6 +29,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 
+# Extra safety if someone runs the checker without Pages-root detection.
 IGNORED_DIRS = {
     ".git",
     ".github",
@@ -30,10 +39,21 @@ IGNORED_DIRS = {
     "node_modules",
     "vendor",
     "build",
+    "venv",
+    ".venv",
+    "functions",
+    "pi-app",
+    "email",
+    "_hubs",
+    "templates",
+    "tests",
+    "hardware",
+    "docs",
 }
 
 IGNORED_PATH_PREFIXES = (
     "sitemap/pages/mods/",
+    "growbru/",  # Python package / non-Pages demos when scanning from monorepo root
 )
 
 IGNORED_FILE_SUFFIXES = (
@@ -91,6 +111,25 @@ class MetaParser(HTMLParser):
             self._title_parts.append(data)
 
 
+def detect_pages_root(cwd: Path) -> Path:
+    """Return the directory that Cloudflare Pages (or static host) actually ships."""
+    public = cwd / "public"
+    web = cwd / "web"
+
+    if (public / "llms.txt").is_file() or (public / "index.html").is_file():
+        return public
+    if (web / "llms.txt").is_file() or (web / "index.html").is_file():
+        return web
+    if (cwd / "llms.txt").is_file() or (cwd / "index.html").is_file():
+        return cwd
+    # Last resort: prefer a known Pages output dir if present
+    if public.is_dir():
+        return public
+    if web.is_dir():
+        return web
+    return cwd
+
+
 def should_skip(path: Path) -> bool:
     parts = set(path.parts)
     if parts & IGNORED_DIRS:
@@ -125,13 +164,13 @@ def parse_page(path: Path) -> PageMeta:
 
 
 def check_llms_txt(root: Path) -> list[str]:
-    """SITE-GUIDE §5.3.3.2a — root llms.txt for agentic browsing."""
+    """SITE-GUIDE §5.3.3.2a — deploy-root llms.txt for agentic browsing."""
     path = root / "llms.txt"
     errors: list[str] = []
     if not path.is_file():
         return [
-            "llms.txt: missing at site root (mandatory for agentic browsing / AI discovery; "
-            "see SITE-GUIDE §5.3.3.2a)"
+            f"llms.txt: missing under deploy root ({root}) "
+            "(mandatory for agentic browsing / AI discovery; see SITE-GUIDE §5.3.3.2a)"
         ]
 
     text = path.read_text(encoding="utf-8", errors="ignore").lstrip("\ufeff")
@@ -158,18 +197,21 @@ def check_llms_txt(root: Path) -> list[str]:
     has_summary = bool(re.search(r"(?m)^>\s+\S+", text))
     if not has_summary:
         errors.append(
-            "llms.txt: missing blockquote summary line (e.g. \"> One sentence about the business\")"
+            'llms.txt: missing blockquote summary line (e.g. "> One sentence about the business")'
         )
 
     return errors
 
 
 def main() -> int:
-    root = Path(os.getcwd())
+    cwd = Path(os.getcwd())
+    root = detect_pages_root(cwd)
+    print(f"SITE-GUIDE compliance: scanning deploy root → {root}")
+
     html_files = collect_html_files(root)
 
     if not html_files:
-        print("No HTML files found. Nothing to check.")
+        print("No HTML files found under deploy root. Nothing to check.")
         return 0
 
     errors: list[str] = []
@@ -199,7 +241,7 @@ def main() -> int:
             errors.append(
                 "duplicate title across pages: "
                 + ", ".join(files)
-                + f" | title=\"{value}\""
+                + f' | title="{value}"'
             )
 
     for value, files in descriptions.items():
@@ -207,7 +249,7 @@ def main() -> int:
             errors.append(
                 "duplicate meta description across pages: "
                 + ", ".join(files)
-                + f" | description=\"{value}\""
+                + f' | description="{value}"'
             )
 
     if errors:
@@ -219,7 +261,7 @@ def main() -> int:
     print("SITE-GUIDE compliance check passed.")
     print(
         "Checked llms.txt (H1 + Markdown links + summary) and indexable HTML "
-        "title/meta-description presence and uniqueness."
+        "title/meta-description presence and uniqueness under the deploy root."
     )
     return 0
 
