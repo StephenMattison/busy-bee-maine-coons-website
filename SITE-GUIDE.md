@@ -1009,11 +1009,17 @@ Keep it short (roughly one screen). Must include:
 
 1. **Site name** and one-line description.
 2. **GitHub remote** for this repo only (e.g. `StephenMattison/example-website`). Agents must commit and push **only** to this remote.
-3. **Binding standards pointer:** follow root `SITE-GUIDE.md`; never edit the local SITE-GUIDE copy — edit canonical `StephenMattison/site-guide`, then run `./sync-guide.sh` (or accept a propagation PR).
-4. **Layout map:** real paths for this site (HTML/PHP pages, `assets/`, `includes/`, build output dir if any).
-5. **Implementation habits:** surgical edits; match existing patterns; version static assets when the guide requires it; finish = implemented + SITE-GUIDE-aligned for touched areas + committed + pushed.
+3. **Hosting (production):** Cloudflare Pages project name, live canonical domain, what directory ships, deploy path (`git push` → Pages), and whether production is static-only or includes Functions (see §3.3.2).
+4. **Binding standards pointer:** follow root `SITE-GUIDE.md`; never edit the local SITE-GUIDE copy — edit canonical `StephenMattison/site-guide`, then run `./sync-guide.sh` (or accept a propagation PR).
+5. **Layout map:** real paths for this site (HTML/PHP pages, `assets/`, `includes/`, build output dir if any).
+6. **Commands** (copy-paste, site-real): rebuild if any, compliance check if present (e.g. `python3 scripts/check-site-guide-compliance.py` from the **Pages root**), deploy (`git push origin main`), live smoke URL. Agents run what you list.
+7. **Boundaries:** this remote only; no force-push / no amend of published history; never edit local `SITE-GUIDE.md`; never commit secrets/`.env`; do not invent ratings, review incentives, phones, or domains.
+8. **Security (short):** secrets only in Cloudflare env (name the keys this site uses, not the values); treat form/API input as untrusted when Functions exist.
+9. **Implementation habits:** surgical edits; match existing patterns; version static assets when the guide requires it; finish = implemented + SITE-GUIDE-aligned for touched areas + committed + pushed + live spot-check.
 
-Optional: links to site-specific docs (`INDEXING-AUTOMATION.md`, deploy notes) if they exist.
+**Do not bloat:** no second copy of this guide, no multi-tool agent config files (`CLAUDE.md`, etc.) unless the operator deliberately uses those tools — root `AGENTS.md` is the portable fallback. Optional: links to site-specific docs (`NEWSLETTER-SETUP.md`, brand notes) if they exist.
+
+**When to update `AGENTS.md`:** new build pipeline, new compliance script, new live domain/Pages project, new Functions/secrets names, or layout change — same commit as the structural change.
 
 #### 5.0.3 Canonical template and setup
 
@@ -1055,7 +1061,7 @@ When working in a website repo that has `AGENTS.md` and `SITE-GUIDE.md`:
 
 No new site is complete until:
 
-- Root `AGENTS.md` exists and names the correct GitHub remote and layout.
+- Root `AGENTS.md` exists and names the correct GitHub remote, hosting/layout, **Commands**, **Boundaries**, and **Security** (§5.0.2).
 - Root `SITE-GUIDE.md` exists and is synced from canonical site-guide.
 - `./sync-guide.sh` exists (or the site is on the propagation list and receives guide updates).
 - Root **`llms.txt`** exists, is valid Markdown for agents (§5.3.3.2a), and live URL returns `text/plain` (not the homepage HTML).
@@ -1799,6 +1805,6 @@ Playwright is the first-pass QA tool; real-device testing is the required final 
 
 **Final Mandate**: Every line of code, every piece of content, every configuration must contribute to **WCAG perfection**, **military-grade security**, and **unbeatable SEO**. No compromises. Sites built to this standard will rank #1, convert at industry-leading rates, and serve every user equitably while withstanding sophisticated attacks.
 
-**Version**: 2026.07 | **Last Reviewed**: July 21, 2026 (AGENTS.md standard) | **Next Review**: Quarterly or after major Google/Core updates.
+**Version**: 2026.08 | **Last Reviewed**: August 5, 2026 (AGENTS.md Commands/Boundaries/Security) | **Next Review**: Quarterly or after major Google/Core updates.
 
 *This guide is living — update immediately when Google, W3C, or security standards evolve.*

@@ -30,7 +30,6 @@ IGNORED_DIRS = {
     "node_modules",
     "vendor",
     "build",
-    "_hubs",  # partial HTML fragments for the static builder — not pages
 }
 
 IGNORED_PATH_PREFIXES = (
@@ -128,9 +127,6 @@ def parse_page(path: Path) -> PageMeta:
 def check_llms_txt(root: Path) -> list[str]:
     """SITE-GUIDE §5.3.3.2a — root llms.txt for agentic browsing."""
     path = root / "llms.txt"
-    if not path.is_file() and (root / "public" / "llms.txt").is_file():
-        # Cloudflare Pages sites ship from public/
-        path = root / "public" / "llms.txt"
     errors: list[str] = []
     if not path.is_file():
         return [
