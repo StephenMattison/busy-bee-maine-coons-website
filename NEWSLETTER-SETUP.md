@@ -94,15 +94,27 @@ If the site says success but Klaviyo is empty:
 
 ---
 
-## Later (optional): drip emails
+## Welcome email (Busy Bee Hive)
 
-When you want automated follow-ups:
+Ready-to-paste HTML (matches site brand + real kitten photos):
 
-1. Klaviyo → **Flows** → **Create flow**  
-2. Trigger: **Added to list** → **Busy Bee Hive**  
-3. Add emails (welcome, care tip, litter alert, etc.) and turn the flow **Live**
+**`email/klaviyo-welcome-hive.html`**
 
-No Cloudflare changes needed for flows.
+### Add it in Klaviyo (~5 min)
+
+1. **Klaviyo → Flows → Create flow**
+2. Trigger: **Added to List** → **Busy Bee Hive**
+3. Add **Email** (delay 0–15 minutes is fine)
+4. Open the email → **Source / Code** or **Import HTML**
+5. Paste the full contents of `email/klaviyo-welcome-hive.html`
+6. **Subject:** `Welcome to the Hive`  
+   **Preview:** `First look at litters & gentle-giant care tips`
+7. From: **Busy Bee Maine Coons** + your verified sender domain
+8. If unsubscribe doesn’t show, use Klaviyo’s built-in **Unsubscribe** tag in the footer
+9. Preview / send test to yourself → set the flow **Live**
+10. Real test: new address (e.g. `you+hive@…`) sign up on cooncatcentral.com, or add profile to Busy Bee Hive in Klaviyo
+
+No Cloudflare changes for flows. Later emails (care tips, litter alerts) = more steps in the same flow or new flows.
 
 ---
 
