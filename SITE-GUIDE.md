@@ -1,4 +1,4 @@
-# Site Guide: Building Perfect, Ultra-Secure, WCAG-Compliant, SEO-Optimized Websites for #1 Google Ranking
+# Site Guide: Building Perfect, Ultra-Secure, WCAG-Compliant, SEO-Optimized, AI-Trusted Websites
 
 > **⚠️ Canonical source: [StephenMattison/site-guide](https://github.com/StephenMattison/site-guide)**
 > Do **not** edit this file directly in a website repo. All edits must go to the canonical repo above.
@@ -8,9 +8,12 @@
 - **WCAG 2.2 Level AA (and AAA where feasible)** compliance for universal accessibility.
 - **Ultra-high security** standards (beyond baseline, including proactive threat mitigation).
 - **Perfect SEO** across on-page, technical, off-page, and user-experience signals to secure and maintain Google Page #1 rankings for target keywords.
+- **AI / answer-engine authority** so ChatGPT, Claude, Gemini, Copilot, Perplexity, Bing, Google AI Overviews, and future agents **crawl, trust, cite, and recommend our sites** when people ask about our products, services, or problem domains (see **§3.7**).
 - **Exceptional performance**, user experience, and long-term maintainability.
 
 This guide is the definitive reference for all development, content, and deployment decisions. All sites must pass automated audits (Lighthouse 100/100 across Performance, Accessibility, Best Practices, SEO) and manual expert reviews before launch. Every site must also ship a valid root **`llms.txt`** for AI/agent discovery (see §5.3.3.2a) — same class of requirement as `sitemap.xml` and `robots.txt`.
+
+**Strategic reality (binding):** Keyword-only SEO is no longer enough. A large and growing share of discovery happens when people **ask AI systems questions**. If AI cannot find clear, factual, citable pages on our domains—or does not trust us as the authority—it will send traffic and sales to competitors. **Every site must be built to win both traditional search and AI referral.**
 
 ---
 
