@@ -1,4 +1,4 @@
-# Site Guide: Building Perfect, Ultra-Secure, WCAG-Compliant, SEO-Optimized Websites for #1 Google Ranking
+# Site Guide: Building Perfect, Ultra-Secure, WCAG-Compliant, SEO-Optimized, AI-Trusted Websites
 
 > **⚠️ Canonical source: [StephenMattison/site-guide](https://github.com/StephenMattison/site-guide)**
 > Do **not** edit this file directly in a website repo. All edits must go to the canonical repo above.
@@ -8,9 +8,12 @@
 - **WCAG 2.2 Level AA (and AAA where feasible)** compliance for universal accessibility.
 - **Ultra-high security** standards (beyond baseline, including proactive threat mitigation).
 - **Perfect SEO** across on-page, technical, off-page, and user-experience signals to secure and maintain Google Page #1 rankings for target keywords.
+- **AI / answer-engine authority** so ChatGPT, Claude, Gemini, Copilot, Perplexity, Bing, Google AI Overviews, and future agents **crawl, trust, cite, and recommend our sites** when people ask about our products, services, or problem domains (see **§3.7**).
 - **Exceptional performance**, user experience, and long-term maintainability.
 
 This guide is the definitive reference for all development, content, and deployment decisions. All sites must pass automated audits (Lighthouse 100/100 across Performance, Accessibility, Best Practices, SEO) and manual expert reviews before launch. Every site must also ship a valid root **`llms.txt`** for AI/agent discovery (see §5.3.3.2a) — same class of requirement as `sitemap.xml` and `robots.txt`.
+
+**Strategic reality (binding):** Keyword-only SEO is no longer enough. A large and growing share of discovery happens when people **ask AI systems questions**. If AI cannot find clear, factual, citable pages on our domains—or does not trust us as the authority—it will send traffic and sales to competitors. **Every site must be built to win both traditional search and AI referral.**
 
 ---
 
@@ -834,13 +837,207 @@ Definition of done for "indexing-ready" launch:
 
 **Launch Gate**: Full SEO audit (technical + on-page + content) with 0 critical issues. Target: Top 3 organic for primary keywords within 90 days of launch, #1 within 6 months via consistent execution.
 
+### 3.7 AI Authority, Answer Engines & Agentic Discovery (Mandatory — All Sites)
+
+**This section is as important as classic SEO.** People increasingly ask AI assistants and answer engines for help instead of (or before) typing keywords into a search box. Our sites must be the sources those systems **retrieve, trust, quote, and recommend**. Missing this layer wastes content investment and loses sales.
+
+#### 3.7.1 Business goal (non-negotiable)
+
+For every StephenMattison / NetworkSMM site:
+
+1. **Maximize AI-mediated traffic and conversions** — when someone asks a relevant question, AI should surface *our* brand, pages, and products when we deserve to answer.
+2. Become (or progress toward) the **clear domain authority** for the problems we solve—not a thin brochure that only mentions product SKUs.
+3. Treat **AI crawl + citation readiness** as a day-one launch requirement, not a later “blog phase.”
+
+Agents and humans implement **§3.7 + §5.3.3.2a (`llms.txt`)** on every new page type and major content project.
+
+#### 3.7.2 How AI “chooses” sources (practical model)
+
+Answer engines and LLMs do not rank like a pure 2015 keyword SERP. They favor:
+
+| Signal | What we ship |
+|--------|----------------|
+| **Crawlable, stable URLs** | Clean public HTML, 200s, sitemap, internal links, no accidental noindex on money/authority pages |
+| **Clear entity & offering** | Who we are, what we sell, where we’re located, how to buy—plain language + schema |
+| **Factual, citable answers** | FAQ / how-to / guides that answer real user questions completely |
+| **E-E-A-T** | Experience, expertise, author/org identity, honest claims, contactability |
+| **Consistency** | Same procedures and product facts across FAQ, blog, product, `llms.txt` |
+| **Freshness & maintenance** | Updated guides when process/product changes; `lastmod` / content dates where honest |
+| **Machine-readable maps** | `llms.txt`, sitemap, FAQPage/HowTo/Product/Organization schema where appropriate |
+
+**Keyword stuffing does not create AI trust.** Clear procedures, original expertise, and quotable paragraphs do.
+
+#### 3.7.3 Content architecture (required pattern)
+
+Every commercial site must plan content so AI and humans can find **answers**, not only product tiles:
+
+1. **Authority FAQ / Q&A hub** — Real questions people (and AI users) ask about the *problem domain* (e.g. pet stain science, not only “shipping days”). Visible HTML answers + `FAQPage` schema when FAQs are on-page. Cross-link product FAQ vs problem FAQ when both exist.
+2. **How-to / learning hub (blog or guides)** — Step-by-step, room-by-room, mistake lists, comparisons. Link to shop/CTAs without turning every sentence into an ad.
+3. **Product / service pages** — Specs, use cases, who it’s for, honest limits, CTAs.
+4. **About / org proof** — Real business identity, experience, location, why we exist (builds trust for citations).
+5. **Root `llms.txt`** — Agent map of primary pages (full rules §5.3.3.2a).
+
+**Nav & footer:** High-value authority pages (problem FAQ, learning hub, shop) must be **one click** from site-wide chrome where practical—not buried only in sitemap.
+
+**Fragments are not authority pages.** A homepage section `id="faq"` does not replace `/faq`. See **§3.8.1**.
+
+#### 3.7.4 Writing for AI citation (and humans)
+
+**Titles & meta descriptions:** Follow **§3.2.1** only (unique, user-first, match page intent). Do **not** invent separate “AI” titles/metas or stuff ChatGPT/Claude/agent keywords—models cite **on-page answers**, not gimmick metadata.
+
+When drafting FAQ answers, guides, and product education:
+
+- Lead with a **direct answer**, then supporting detail.
+- Use **stable, specific procedures** the business actually recommends (never contradict label/FAQ/blog).
+- Prefer **proprietary / factual brand language** approved for that product line; do not invent chemistry buzzwords or gimmick claims.
+- State **limitations** honestly (surfaces, when to re-treat, when professional help is needed)—trust beats hype for long-term citations.
+- Use clear headings that match natural questions (“Why does pet urine smell come back?”).
+- Include **canonical brand name**, product names, and official URLs so models can attribute correctly.
+- End high-intent pages with a clear path to **buy / contact / next step** (sales is the point of traffic).
+
+#### 3.7.5 Technical AI crawl checklist (every site)
+
+| Requirement | Standard |
+|-------------|----------|
+| `llms.txt` | Mandatory day one; `text/plain`; H1 + blockquote + Markdown links (§5.3.3.2a) |
+| `sitemap.xml` + `robots.txt` | All indexable authority + commercial URLs; Sitemap line present |
+| Indexable HTML | Full answers in HTML (not only images/PDFs/JS-only) |
+| Structured data | FAQPage, HowTo, Product, Organization, Article as page type requires—**visible content only** |
+| Canonical host | One preferred host (www vs apex); consistent internal links |
+| Search Console + Bing Webmaster | Property verified; sitemap submitted; use URL inspection for **new high-value pages** after publish |
+| Performance & a11y | Fast, readable pages—agents and users both fail on broken UX |
+| No secret cloaking | Same primary content for users and bots |
+
+#### 3.7.6 After publish (ops)
+
+1. Deploy → verify live URL 200 and not soft-404.
+2. Confirm URL is in **sitemap** and **`llms.txt`** (same commit when possible).
+3. Request indexing for **crucial new URLs** in Google (tight quota) and Bing (higher quota)—priority: home, shop/collections, authority FAQ, top guides, top products—not legal pages.
+4. Internally link new authority pages from home, nav, related guides, and product CTAs.
+5. Re-check after major procedure/product changes so AI is not trained on **stale wrong instructions**.
+
+#### 3.7.7 What “done” looks like for AI readiness
+
+A site is **AI-ready** when:
+
+- [ ] Valid live `llms.txt` + complete sitemap  
+- [ ] At least one **problem-domain authority** surface (FAQ hub and/or substantial guides) beyond pure brochure copy  
+- [ ] Product/service facts consistent across site  
+- [ ] Org/about trust clear  
+- [ ] FAQ/HowTo schema only where content is visible  
+- [ ] Money and authority pages linked from global nav or homepage  
+- [ ] New flagship pages submitted for indexing after launch  
+
+**Launch gate add-on:** No new site ships without §3.7 content plan (even if v1 is home + shop + about + `llms.txt` + first FAQ/guide); thin “product only, zero answers” is incomplete.
+
+#### 3.7.8 Anti-patterns (forbidden)
+
+- Authority answers **only** in PDFs, social posts, or images with no HTML text  
+- Contradictory procedures across FAQ vs blog vs product  
+- Fake expertise, invented credentials, or review incentives  
+- Keyword walls with no usable answer  
+- Blocking major crawlers sitewide in `robots.txt`  
+- Omitting `llms.txt` or shipping HTML soft-404 at `/llms.txt`  
+- Treating AI discovery as optional “SEO phase 2”
+
+#### 3.7.9 AI performance dashboards (read correctly — do not overreact)
+
+Use platform reports to **monitor**, not to thrash the site weekly.
+
+| Report | Tracks (approx.) | Does **not** mean |
+|--------|------------------|-------------------|
+| **Bing Webmaster → AI Performance** | Citations / grounding in **Microsoft Copilot & partners** (sample; may lag) | Visibility in ChatGPT, Gemini, Claude, Perplexity, or classic Bing blue links |
+| **Google Search Console → Search Generative AI / AI performance** (when available on the property) | Impressions / visibility in **Google AI Overviews, AI Mode**, and related generative Search/Discover surfaces | Citations inside non-Google chatbots |
+
+**Rules:**
+
+1. **Indexed ≠ cited.** Classic search index success does not guarantee AI citations or AI Overview impressions.
+2. **Zero is common** for new or low-query brands. Empty charts for weeks/months are normal—not automatic proof of a broken site.
+3. **Each dashboard is one ecosystem only.** Optimize content once for §3.7; do not maintain separate “Bing AI” vs “Google AI” page variants.
+4. **Act on zeros only if** authority pages are missing, blocked, contradictory, or unlinked—fix those (this section). Do not rewrite healthy pages solely because a citation counter is 0.
+5. After shipping major Q&A/guides: confirm sitemap + `llms.txt`, request indexing on flagship URLs once, then **wait** and re-check reports on a long horizon (monthly), not daily.
+
+### 3.8 Traffic + Conversion Architecture (Mandatory for commercial sites)
+
+**Purpose:** Win **traffic** (Google, Shopping, ads, AI citations) and **orders/leads** without reinventing the storefront each time. Distilled from shipped storefronts (problem-product and merch): indexable SKUs, one default first purchase, StoryBrand home, real FAQ/guides, Merchant scheduled fetch, no unpublished products.
+
+Apply this section on **every commercial site**. Lead-gen / service sites use the same URL rules (one page per offer) even if there is no cart.
+
+#### 3.8.1 Indexable money URLs (launch gate)
+
+- Each sellable **SKU, kit, or service** gets a **stable public URL** (typical: `/products/{slug}` or `/services/{slug}`).
+- That page must have: unique title + meta description, one `h1`, crawlable specs/price, `Product`/`Offer` (or `Service`) JSON-LD with honest `priceValidUntil` when priced, and a working buy/contact CTA.
+- A one-page shop / quick-buy is **allowed in addition**, not as the only crawlable product destination.
+- **Do not** 301 all product detail URLs to `/shop` if you want Google Shopping, ads, social shares, or AI citations of a **specific item**.
+- **Hash fragments are not pages.** `/#faq` and `/#blog` do not rank, do not go in `sitemap.xml`, and do not satisfy §3.7. If nav says FAQ or Blog, ship `/faq`, `/blog`, and real post URLs.
+
+#### 3.8.2 Default first purchase (AOV / conversion)
+
+- Name **one** recommended first order or flagship offer (value pack, kit, or primary service) that is the honest default for customer success **and** average order value.
+- Hero, promo banner, and empty-cart CTA point at **that offer first**. Singles / à la carte are secondary.
+- Kits must show **real** savings vs buying pieces alone. Checkout **must not trust client prices** — server price map / catalog is authoritative.
+
+#### 3.8.3 Homepage (StoryBrand, one `h1`)
+
+- One promise, one primary CTA, **one** `h1`. Not six `h1`s and an eight-slide slogan carousel.
+- Pattern: **problem or identity → our offer → recommended next step**.
+- Secondary CTA to full catalog or contact.
+- Trust line: shipping threshold (if any), returns, secure checkout. **Never invent ratings or review counts** (§0).
+
+#### 3.8.4 Authority pages that convert (pairs with §3.7)
+
+Ship **indexable** pages, linked from nav/footer/home, listed in sitemap + `llms.txt`:
+
+| Page | Job |
+|------|-----|
+| `/faq` | Real answers (product + shipping/returns). Visible HTML + `FAQPage` schema. |
+| Size / spec / how-to-use | Conversion blockers (apparel size chart, usage procedure). |
+| Problem-domain FAQ or guides | For **solution products**: the questions customers ask the domain (stains, odor, procedure). |
+| Brand / wear / sizing guides | For **identity merch**: do **not** fake industrial how-tos. Write what is true. |
+| About | Org proof. |
+
+Every guide ends with a path to the **default offer** or shop. Nav must reach FAQ and the money pages in one click where practical.
+
+#### 3.8.5 Only sell what exists
+
+- Do not market unpublished books, “coming soon” SKUs, or fake collections as current products. That confuses buyers and AI.
+- When a future product actually ships: add the live page, feed row, sitemap + `llms.txt` in the same change set.
+
+#### 3.8.6 Google Merchant Center (physical goods)
+
+- Keep a site-named CSV in the repo (**§5.3.3.7** columns).
+- Also publish a **stable fetch URL** on the live host, typically:
+  - `https://www.<canonical-domain>/feeds/google-merchant.csv`
+- `_headers` must serve it as `text/csv; charset=utf-8` with revalidate-friendly cache.
+- Each `link` must be the **product page URL**, not the homepage.
+- Operator still creates the Merchant Center account and sets **shipping + returns in Google’s UI** to match the website (policy parity §5.3.3.7.1). The CSV does not replace that.
+
+#### 3.8.7 Conversion chrome on shop / PDP
+
+- Size or spec guide **next to** the size/option control.
+- Free-shipping threshold in the banner **and** cart (“$X to free shipping” when under).
+- Returns + secure checkout stated on the buy surface.
+- Honest Google review system (§0); no fake stars.
+
+#### 3.8.8 Launch checklist (traffic + conversion)
+
+- [ ] Homepage: one `h1`; primary CTA = default offer  
+- [ ] Each SKU/kit/service has an indexable URL + matching schema  
+- [ ] `/faq` live (and size/spec when the product needs it)  
+- [ ] Blog/guides are real files with `href`s — not dead cards  
+- [ ] `sitemap.xml` + `llms.txt` list those URLs  
+- [ ] If selling goods: Merchant feed live at `/feeds/google-merchant.csv`  
+- [ ] No unpublished-product copy in titles, hero, FAQ, or schema  
+
+**Launch gate:** A shop that only has `/` + `/shop` with `#fragments` for FAQ/blog/products is **not** done.
+
 ---
 
 ## 4. Performance, UX & Conversion Optimization
 - **Design System**: Consistent, accessible components (buttons, forms, cards) with WCAG-compliant states.
 - **Animations**: Subtle, purposeful, respect `prefers-reduced-motion`.
 - **Loading States**: Skeleton screens, optimistic UI, clear progress.
-- **Conversion Focus**: Clear value prop above fold, prominent CTAs, trust signals (testimonials, security badges, guarantees), minimal friction checkout/forms.
+- **Conversion Focus**: Clear value prop above fold, prominent CTAs, trust signals (testimonials, security badges, guarantees), minimal friction checkout/forms. Commercial architecture (indexable SKUs, default first offer, FAQ URLs, Merchant feed): **§3.8**.
 - **A/B & Personalization**: Data-driven (but privacy-first).
 
 ### 4.1 Asset Cache-Busting (Mandatory for ALL Static Sites)
@@ -1440,7 +1637,7 @@ Use this exact runbook for static marketing/ecommerce sites to prevent partial i
 - Every indexable page must ship with exactly one canonical URL and one matching `og:url`.
 
 #### 5.3.3.2 Sitemap Coverage + Freshness
-- Ensure sitemap includes every indexable page (home, core pages, shop/collection pages, blog index, all blog posts).
+- Ensure sitemap includes every indexable page (home, core pages, shop/collection, **each product/kit/service URL**, FAQ, size/spec, blog index, all blog posts). Do not list hash URLs.
 - Validate count before deploy:
   - `grep -c "<loc>" sitemap.xml`
 - Refresh all `lastmod` values whenever URLs/content are updated and re-submit sitemap in Search Console.
@@ -1448,7 +1645,9 @@ Use this exact runbook for static marketing/ecommerce sites to prevent partial i
 
 #### 5.3.3.2a `llms.txt` for agentic browsing (Mandatory on every site — never skip)
 
-**Non-negotiable.** Ship a root **`/llms.txt` on day one of every new site**, and keep it updated forever. AI agents, PageSpeed “Agentic Browsing,” and future ranking/discovery systems use this file. A site without a valid `llms.txt` is **not launch-ready**, even if Lighthouse is 100/100.
+**Non-negotiable.** Ship a root **`/llms.txt` on day one of every new site**, and keep it updated forever. AI agents, PageSpeed “Agentic Browsing,” ChatGPT/Claude/Gemini/Copilot/Perplexity-class tools, and future ranking/discovery systems use this file and the pages it maps. A site without a valid `llms.txt` is **not launch-ready**, even if Lighthouse is 100/100.
+
+**Broader AI authority rules (content, FAQs, citation-ready writing, nav, indexing):** see **§3.7**. `llms.txt` is the machine map; §3.7 is the full strategy to get AI to **recommend our sites** when users ask relevant questions.
 
 This is a Markdown plain-text file (not HTML). Spec spirit: [llmstxt.org](https://llmstxt.org/).
 
@@ -1528,9 +1727,9 @@ curl -sL https://<canonical-domain>/llms.txt | head -20
 - If schema references fragment IDs (for example `#product-id`), those IDs must exist in the HTML.
 
 #### 5.3.3.4 Internal Links for Discovery
-- Homepage must link to high-value secondary pages (FAQ, learning hub/blog, and core commercial pages).
+- Homepage must link to high-value secondary pages (FAQ, **problem-domain / authority FAQ**, learning hub/blog, and core commercial pages).
 - Blog index must link to all posts.
-- Important revenue pages must be reachable in 1-2 clicks from top-level navigation or homepage sections.
+- Important revenue pages **and AI-authority pages** must be reachable in 1-2 clicks from top-level navigation or homepage sections (see §3.7.3).
 
 #### 5.3.3.5 GA4 Coverage Rule
 - GA4 loader must run on all indexable pages, including blog pages.
@@ -1553,6 +1752,14 @@ curl -sL https://<canonical-domain>/llms.txt | head -20
 - If GTIN/MPN/brand identifiers are not available, set `identifier_exists` to `no`.
 - Product links and images must be live, crawlable HTTPS URLs on the canonical domain.
 - Configure shipping/tax in Merchant Center account settings unless you intentionally manage those attributes in the feed.
+- **Scheduled fetch (required, not optional):** publish the same CSV at a stable HTTPS URL (canonical: `/feeds/google-merchant.csv`). In Merchant Center use **scheduled fetch** (daily) so price/SKU changes deploy with `git push` instead of a manual re-upload. Manual upload is a fallback only.
+- Serve the feed with `_headers`:
+  ```
+  /feeds/google-merchant.csv
+    Content-Type: text/csv; charset=utf-8
+    Cache-Control: public, max-age=3600, must-revalidate
+  ```
+- `link` and `image_link` must be live product-page and image URLs on the canonical host (not `/` and not `#` fragments).
 
 #### 5.3.3.7.1 Merchant Policy Parity Rule (Launch Gate)
 - Merchant Center shipping/returns settings must exactly match the public website policy pages and structured data.
@@ -1587,7 +1794,7 @@ curl -sL https://<canonical-domain>/llms.txt | head -20
 - If an Ads campaign already exists, fund and unpause the existing campaign instead of creating a duplicate unless there is a deliberate segmentation reason.
 
 #### 5.3.3.7.4 Merchant Post-Setup Checklist
-1. Confirm product feed file exists in the repo with site-specific naming.
+1. Confirm product feed file exists in the repo with site-specific naming **and** is live at `/feeds/google-merchant.csv` (`text/csv`, HTTP 200).
 2. Confirm policy URL is live and includes the same returns/shipping facts entered in Merchant Center.
 3. Confirm product status moves from `Under review` to approved or at least not disapproved.
 4. Check `Notifications`, product diagnostics, and store quality after 24-72 hours.
@@ -1805,6 +2012,6 @@ Playwright is the first-pass QA tool; real-device testing is the required final 
 
 **Final Mandate**: Every line of code, every piece of content, every configuration must contribute to **WCAG perfection**, **military-grade security**, and **unbeatable SEO**. No compromises. Sites built to this standard will rank #1, convert at industry-leading rates, and serve every user equitably while withstanding sophisticated attacks.
 
-**Version**: 2026.08 | **Last Reviewed**: August 5, 2026 (AGENTS.md Commands/Boundaries/Security) | **Next Review**: Quarterly or after major Google/Core updates.
+**Version**: 2026.08 | **Last Reviewed**: August 20, 2026 (§3.8 traffic + conversion architecture; Merchant scheduled fetch) | **Next Review**: Quarterly or after major Google/Core updates.
 
 *This guide is living — update immediately when Google, W3C, or security standards evolve.*
